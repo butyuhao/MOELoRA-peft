@@ -16,6 +16,7 @@ peft_path=""
 # # Training Command
 deepspeed --num_gpus=4 --master_port $MASTER_PORT run_mlora.py \
     --deepspeed src/ds.config \
+    --data_config bigfive_task\
     --do_train \
     --train_file $your_data_path/train.json \
     --cache_dir $your_data_path \

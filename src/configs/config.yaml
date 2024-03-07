@@ -1,3 +1,10 @@
+bigfive_task:
+  cache_dir: /cpfs01/user/chenqin.p/dyh/cache_dir
+  datasets:
+    - bigfive_task_id:
+        val_split: 0.2
+
+
 educhat-hq-2-24:
   cache_dir: /cpfs01/user/chenqin.p/dyh/cache_dir
   datasets:

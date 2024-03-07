@@ -1,7 +1,7 @@
 import json
 from datasets import load_dataset, Dataset
 My_custom_data = {
-"bigfive_task_id":""
+"bigfive_task_id":"/cpfs01/user/chenqin.p/dyh/MOELoRA-peft/data/bigfive_task_id.jsonl"
 }
 class MyCustom(Dataset):
     def __init__(self, mode: str, cache_dir: str = None) -> None:
