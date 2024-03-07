@@ -128,6 +128,12 @@ class DataTrainingArguments:
             "help": "An optional input test data file to evaluate the metrics (rouge) on (a jsonlines or csv file)."
         },
     )
+    data_config: Optional[str] = field(
+        default="",
+        metadata={
+            "help": "path to dataset config"
+        },
+    )
     overwrite_cache: bool = field(
         default=True, metadata={"help": "Overwrite the cached training and evaluation sets"}
     )

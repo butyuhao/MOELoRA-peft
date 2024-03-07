@@ -46,6 +46,8 @@ from src.MLoRA.peft import MMOELoraConfigS
 from src.data_processor.chatglm import chatglm1_train, chatglm1_eval
 from src.data_processor.chatglm2 import chatglm2_train, chatglm2_eval
 from src.data_processor.collator import LongestSequenceCollator
+from utils.custom_datasets.dialogue_collator import DialogueDataCollator
+from utils.utils_oa import get_dataset
 
 logger = logging.getLogger(__name__)
 
@@ -91,25 +93,46 @@ def main(parser):
     set_seed(training_args.seed)
 
     # Load dataset
-    data_files = {}
-    if data_args.train_file is not None:
-        data_files["train"] = data_args.train_file
-        extension = data_args.train_file.split(".")[-1]
-    if data_args.validation_file is not None:
-        data_files["validation"] = data_args.validation_file
-        extension = data_args.validation_file.split(".")[-1]
-    if data_args.test_file is not None:
-        data_files["test"] = data_args.test_file
-        extension = data_args.test_file.split(".")[-1]
+    # data_files = {}
+    # if data_args.train_file is not None:
+    #     data_files["train"] = data_args.train_file
+    #     extension = data_args.train_file.split(".")[-1]
+    # if data_args.validation_file is not None:
+    #     data_files["validation"] = data_args.validation_file
+    #     extension = data_args.validation_file.split(".")[-1]
+    # if data_args.test_file is not None:
+    #     data_files["test"] = data_args.test_file
+    #     extension = data_args.test_file.split(".")[-1]
 
-    raw_datasets = load_dataset(
-        "json",
-        data_files=data_files,
-        cache_dir=model_args.cache_dir,
-        use_auth_token=True if model_args.use_auth_token else None,
-    )
-    print("raw_datasets: ", raw_datasets)
-    # print("raw_datasets: ", len(raw_datasets["train"]))
+    # raw_datasets = load_dataset(
+    #     "json",
+    #     data_files=data_files,
+    #     cache_dir=model_args.cache_dir,
+    #     use_auth_token=True if model_args.use_auth_token else None,
+    # )
+    # print("raw_datasets: ", raw_datasets)
+    # # print("raw_datasets: ", len(raw_datasets["train"]))
+
+    # read config from configs
+    def read_yamls(dir):
+        conf = {}
+        no_conf = True
+
+        for config_file in Path(dir).glob("**/*.yaml"):
+            no_conf = False
+            with config_file.open("r") as f:
+                conf.update(yaml.safe_load(f))
+
+        if no_conf:
+            print(f"WARNING: No yaml files found in {dir}")
+
+        return conf
+
+    data_conf = read_yamls("../configs/")
+    data_conf = data_conf[data_args.data_config]
+
+    data_module = get_dataset(data_conf)
+    data_collator = DialogueDataCollator(tokenizer=tokenizer, max_len=data_args.max_source_length)
 
     # Load pretrained model and tokenizer
     config = AutoConfig.from_pretrained(
