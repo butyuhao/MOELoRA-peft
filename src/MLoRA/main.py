@@ -323,7 +323,8 @@ def main(parser):
     #     )
     # else:
     if training_args.do_train:
-        data_collator = LongestSequenceCollator(tokenizer, task_flag, depart_flag)
+        # data_collator = LongestSequenceCollator(tokenizer, task_flag, depart_flag)
+        data_collator = DialogueDataCollator(tokenizer=tokenizer, max_len=data_args.max_source_length)
     else:
         data_collator = DataCollatorForSeq2Seq(
             tokenizer,
@@ -365,8 +366,7 @@ def main(parser):
     trainer = Seq2SeqTrainer(
         model=model,
         args=training_args,
-        train_dataset=train_dataset if training_args.do_train else None,
-        eval_dataset=eval_dataset if training_args.do_eval else None,
+        **data_module, # train dataset and eval dataset
         tokenizer=tokenizer,
         data_collator=data_collator,
         compute_metrics=compute_metrics if training_args.predict_with_generate else None,
