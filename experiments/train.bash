@@ -1,4 +1,4 @@
-lora_rank=16
+lora_rank=320
 lora_trainable="gate_proj,k_proj,o_proj,down_proj,v_proj,q_proj,up_proj"
 modules_to_save="null"
 lora_dropout=0.1

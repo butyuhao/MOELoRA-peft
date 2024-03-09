@@ -330,7 +330,6 @@ class MMOELinearA(nn.Module):
     def __init__(self, in_features, out_features, expert_num) -> None:
 
         super().__init__()
-
         self.expert_num = expert_num
         self.in_features, self.out_features = in_features, out_features
         self.loraA = nn.ModuleList([])
@@ -340,7 +339,6 @@ class MMOELinearA(nn.Module):
         
         for _ in range(self.expert_num):
             self.loraA.append(Expert(self.in_features, self.r))
-
     
     def forward(self, x):
         '''input x is a vector, return output is a list'''

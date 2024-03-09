@@ -36,6 +36,8 @@ from transformers import (
     DataCollatorForSeq2Seq,
     set_seed,
 )
+from pathlib import Path
+import yaml
 
 sys.path.append("./")
 
@@ -114,6 +116,7 @@ def main(parser):
     # # print("raw_datasets: ", len(raw_datasets["train"]))
 
     # read config from configs
+    
     def read_yamls(dir):
         conf = {}
         no_conf = True
@@ -128,10 +131,16 @@ def main(parser):
 
         return conf
 
-    data_conf = read_yamls("../configs/")
+    tokenizer = AutoTokenizer.from_pretrained(
+        model_args.model_name_or_path,
+        trust_remote_code=True,
+    )
+
+    data_conf = read_yamls("/cpfs01/user/chenqin.p/dyh/MOELoRA-peft/src/configs")
+    print(data_conf)
     data_conf = data_conf[data_args.data_config]
 
-    data_module = get_dataset(data_conf)
+    train_dataset, eval_dataset = get_dataset(data_conf)
     data_collator = DialogueDataCollator(tokenizer=tokenizer, max_len=data_args.max_source_length)
 
     # Load pretrained model and tokenizer
@@ -141,11 +150,6 @@ def main(parser):
     )
     config.pre_seq_len = model_args.pre_seq_len
     config.prefix_projection = model_args.prefix_projection
-
-    tokenizer = AutoTokenizer.from_pretrained(
-        model_args.model_name_or_path,
-        trust_remote_code=True,
-    )
 
     model = AutoModel.from_pretrained(
         model_args.model_name_or_path,
@@ -207,108 +211,106 @@ def main(parser):
     prefix = data_args.source_prefix if data_args.source_prefix is not None else ""
 
     # Preprocessing the datasets.
-    # We need to tokenize inputs and targets.
-    if training_args.do_train:
-        column_names = raw_datasets["train"].column_names
-    elif training_args.do_eval:
-        column_names = raw_datasets["validation"].column_names
-    elif training_args.do_predict:
-        column_names = raw_datasets["test"].column_names
-    else:
-        logger.info("There is nothing to do. Please pass `do_train`, `do_eval` and/or `do_predict`.")
-        return
+    # # We need to tokenize inputs and targets.
+    # if training_args.do_train:
+    #     column_names = raw_datasets["train"].column_names
+    # elif training_args.do_eval:
+    #     column_names = raw_datasets["validation"].column_names
+    # elif training_args.do_predict:
+    #     column_names = raw_datasets["test"].column_names
+    # else:
+    #     logger.info("There is nothing to do. Please pass `do_train`, `do_eval` and/or `do_predict`.")
+    #     return
 
     # Get the column names for input/target.
-    prompt_column = data_args.prompt_column
-    response_column = data_args.response_column
-    history_column = data_args.history_column
+    # prompt_column = data_args.prompt_column
+    # response_column = data_args.response_column
+    # history_column = data_args.history_column
     
     # Temporarily set max_target_length for training.
     max_target_length = data_args.max_target_length
 
     def print_dataset_example(example):
-        print("input_ids: ",example["input_ids"])
-        print("inputs: ", tokenizer.decode(example["input_ids"]))
-        print("label_ids: ", example["labels"])
+        print(example)
         #print("labels: ", tokenizer.decode(example["labels"])) # For ChatGLMv2
     
-    if model_args.model_name_or_path.split("/")[-1] == "chatglm-6b":
-        preprocess_function_train = chatglm1_train(data_args, model_args, prompt_column,
-                                                   response_column, history_column, prefix,
-                                                   tokenizer, task_flag, depart_flag)
-        preprocess_function_eval = chatglm1_eval(data_args, model_args, prompt_column,
-                                                 response_column, history_column, prefix,
-                                                 tokenizer, task_flag, depart_flag)
-    elif model_args.model_name_or_path.split("/")[-1] == "chatglmv2":
-        preprocess_function_train = chatglm2_train(data_args, model_args, prompt_column,
-                                                   response_column, history_column, prefix,
-                                                   tokenizer, task_flag, model_args.department)
-        preprocess_function_eval = chatglm2_eval(data_args, model_args, prompt_column,
-                                                 response_column, history_column, prefix,
-                                                 tokenizer, task_flag, model_args.department)
-    else:
-        raise ValueError("No such Foundation Model")
+    # if model_args.model_name_or_path.split("/")[-1] == "chatglm-6b":
+    #     preprocess_function_train = chatglm1_train(data_args, model_args, prompt_column,
+    #                                                response_column, history_column, prefix,
+    #                                                tokenizer, task_flag, depart_flag)
+    #     preprocess_function_eval = chatglm1_eval(data_args, model_args, prompt_column,
+    #                                              response_column, history_column, prefix,
+    #                                              tokenizer, task_flag, depart_flag)
+    # elif model_args.model_name_or_path.split("/")[-1] == "chatglmv2":
+    #     preprocess_function_train = chatglm2_train(data_args, model_args, prompt_column,
+    #                                                response_column, history_column, prefix,
+    #                                                tokenizer, task_flag, model_args.department)
+    #     preprocess_function_eval = chatglm2_eval(data_args, model_args, prompt_column,
+    #                                              response_column, history_column, prefix,
+    #                                              tokenizer, task_flag, model_args.department)
+    # else:
+    #     raise ValueError("No such Foundation Model")
 
     if training_args.do_train:
-        if "train" not in raw_datasets:
-            raise ValueError("--do_train requires a train dataset")
-        train_dataset = raw_datasets["train"]
-        if data_args.max_train_samples is not None:
-            max_train_samples = min(len(train_dataset), data_args.max_train_samples)
-            train_dataset = train_dataset.select(range(max_train_samples))
-        with training_args.main_process_first(desc="train dataset map pre-processing"):
-            train_dataset = train_dataset.map(
-                preprocess_function_train,
-                batched=True,
-                num_proc=data_args.preprocessing_num_workers,
-                remove_columns=column_names,
-                load_from_cache_file=False,
-                desc="Running tokenizer on train dataset",
-            )
+        # if "train" not in raw_datasets:
+        #     raise ValueError("--do_train requires a train dataset")
+        # train_dataset = raw_datasets["train"]
+        # if data_args.max_train_samples is not None:
+        #     max_train_samples = min(len(train_dataset), data_args.max_train_samples)
+        #     train_dataset = train_dataset.select(range(max_train_samples))
+        # with training_args.main_process_first(desc="train dataset map pre-processing"):
+        #     train_dataset = train_dataset.map(
+        #         preprocess_function_train,
+        #         batched=True,
+        #         num_proc=data_args.preprocessing_num_workers,
+        #         remove_columns=column_names,
+        #         load_from_cache_file=False,
+        #         desc="Running tokenizer on train dataset",
+        #     )
         print_dataset_example(train_dataset[0])
         print_dataset_example(train_dataset[1])
-        train_dataset.set_format("torch")
+        # train_dataset.set_format("torch")
 
     if training_args.do_eval:
-        max_target_length = data_args.val_max_target_length
-        if "validation" not in raw_datasets:
-            raise ValueError("--do_eval requires a validation dataset")
-        eval_dataset = raw_datasets["validation"]
-        if data_args.max_eval_samples is not None:
-            max_eval_samples = min(len(eval_dataset), data_args.max_eval_samples)
-            eval_dataset = eval_dataset.select(range(max_eval_samples))
-        with training_args.main_process_first(desc="validation dataset map pre-processing"):
-            eval_dataset = eval_dataset.map(
-                preprocess_function_eval,
-                batched=True,
-                num_proc=data_args.preprocessing_num_workers,
-                remove_columns=column_names,
-                load_from_cache_file=False,
-                desc="Running tokenizer on validation dataset",
-            )
+        # max_target_length = data_args.val_max_target_length
+        # if "validation" not in raw_datasets:
+        #     raise ValueError("--do_eval requires a validation dataset")
+        # eval_dataset = raw_datasets["validation"]
+        # if data_args.max_eval_samples is not None:
+        #     max_eval_samples = min(len(eval_dataset), data_args.max_eval_samples)
+        #     eval_dataset = eval_dataset.select(range(max_eval_samples))
+        # with training_args.main_process_first(desc="validation dataset map pre-processing"):
+        #     eval_dataset = eval_dataset.map(
+        #         preprocess_function_eval,
+        #         batched=True,
+        #         num_proc=data_args.preprocessing_num_workers,
+        #         remove_columns=column_names,
+        #         load_from_cache_file=False,
+        #         desc="Running tokenizer on validation dataset",
+        #     )
         print_dataset_example(eval_dataset[0])
         print_dataset_example(eval_dataset[1])
 
-    if training_args.do_predict:
-        max_target_length = data_args.val_max_target_length
-        if "test" not in raw_datasets:
-            raise ValueError("--do_predict requires a test dataset")
-        predict_dataset = raw_datasets["test"]
-        if data_args.max_predict_samples is not None:
-            max_predict_samples = min(len(predict_dataset), data_args.max_predict_samples)
-            predict_dataset = predict_dataset.select(range(max_predict_samples))
-        with training_args.main_process_first(desc="prediction dataset map pre-processing"):
-            predict_dataset = predict_dataset.map(
-                preprocess_function_eval,
-                batched=True,
-                num_proc=data_args.preprocessing_num_workers,
-                remove_columns=column_names,
-                load_from_cache_file=False,
-                desc="Running tokenizer on prediction dataset",
-            )
-        print_dataset_example(predict_dataset[0])
-        print_dataset_example(predict_dataset[1])
-        predict_dataset.set_format("torch")
+    # if training_args.do_predict:
+    #     max_target_length = data_args.val_max_target_length
+    #     if "test" not in raw_datasets:
+    #         raise ValueError("--do_predict requires a test dataset")
+    #     predict_dataset = raw_datasets["test"]
+    #     if data_args.max_predict_samples is not None:
+    #         max_predict_samples = min(len(predict_dataset), data_args.max_predict_samples)
+    #         predict_dataset = predict_dataset.select(range(max_predict_samples))
+    #     with training_args.main_process_first(desc="prediction dataset map pre-processing"):
+    #         predict_dataset = predict_dataset.map(
+    #             preprocess_function_eval,
+    #             batched=True,
+    #             num_proc=data_args.preprocessing_num_workers,
+    #             remove_columns=column_names,
+    #             load_from_cache_file=False,
+    #             desc="Running tokenizer on prediction dataset",
+    #         )
+    #     print_dataset_example(predict_dataset[0])
+    #     print_dataset_example(predict_dataset[1])
+    #     predict_dataset.set_format("torch")
 
     # Data collator
     label_pad_token_id = -100 if data_args.ignore_pad_token_for_loss else tokenizer.pad_token_id
@@ -366,7 +368,8 @@ def main(parser):
     trainer = Seq2SeqTrainer(
         model=model,
         args=training_args,
-        **data_module, # train dataset and eval dataset
+        train_dataset=train_dataset, # train dataset and eval dataset
+        eval_dataset=eval_dataset,
         tokenizer=tokenizer,
         data_collator=data_collator,
         compute_metrics=compute_metrics if training_args.predict_with_generate else None,
