@@ -141,6 +141,7 @@ def main(parser):
     data_conf = data_conf[data_args.data_config]
 
     train_dataset, eval_dataset = get_dataset(data_conf)
+    print("train_dataset", train_dataset[0])
     data_collator = DialogueDataCollator(tokenizer=tokenizer, max_len=data_args.max_source_length)
 
     # Load pretrained model and tokenizer

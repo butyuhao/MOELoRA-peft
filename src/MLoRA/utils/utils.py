@@ -10,12 +10,12 @@ import evaluate
 import torch
 import transformers
 import yaml
-from model_training.custom_datasets import get_one_dataset
-from model_training.custom_datasets.formatting import QA_SPECIAL_TOKENS
-from model_training.losses import CrossEntropyLoss, PolyLoss, RMCLSLoss, RMLoss
-from model_training.models import freeze_top_n_layers, get_specific_model
-from model_training.models.patching import patch_model
-from model_training.models.reward_model import GPTNeoXRewardModel
+from custom_datasets import get_one_dataset
+from custom_datasets.formatting import QA_SPECIAL_TOKENS
+# from model_training.losses import CrossEntropyLoss, PolyLoss, RMCLSLoss, RMLoss
+# from model_training.models import freeze_top_n_layers, get_specific_model
+# from model_training.models.patching import patch_model
+# from model_training.models.reward_model import GPTNeoXRewardModel
 from sklearn.model_selection import train_test_split
 from tokenizers import pre_tokenizers
 from torch.utils.data import ConcatDataset, Dataset, Subset
@@ -395,17 +395,17 @@ def get_dataset(
     return train, evals
 
 
-def get_loss(loss, poly_eps: float = 1.0, score_l2_reg: float = 0.001):
-    if loss == "CrossEntropyLoss":
-        return CrossEntropyLoss()
-    elif loss == "Poly":
-        return PolyLoss(epsilon=poly_eps)
-    elif loss == "RMLoss":
-        return RMLoss(beta=score_l2_reg)
-    elif loss == "RMCLSLoss":
-        return RMCLSLoss()
-    else:
-        raise ValueError(f"Loss {loss} not supported")
+# def get_loss(loss, poly_eps: float = 1.0, score_l2_reg: float = 0.001):
+#     if loss == "CrossEntropyLoss":
+#         return CrossEntropyLoss()
+#     elif loss == "Poly":
+#         return PolyLoss(epsilon=poly_eps)
+#     elif loss == "RMLoss":
+#         return RMLoss(beta=score_l2_reg)
+#     elif loss == "RMCLSLoss":
+#         return RMCLSLoss()
+#     else:
+#         raise ValueError(f"Loss {loss} not supported")
 
 
 def read_yamls(dir):

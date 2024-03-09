@@ -335,9 +335,7 @@ def get_dataset(
 
     train = ConcatDataset(train_datasets)
 
-    return dict(train_dataset=train, eval_dataset=evals)
-
-
+    return train, evals
 
 
 def read_yamls(dir):

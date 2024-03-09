@@ -101,7 +101,7 @@ class DialogueDataCollator:
     def preprocess_internlm(
         self,
         sources,
-        system_messages
+        task_ids
     ) -> Dict:
         roles = {"user": "<|im_start|>user", "assistant": "<|im_start|>assistant"}
         tokenizer = self.tokenizer
@@ -169,9 +169,10 @@ class DialogueDataCollator:
 
     def __call__(self, features):
         # features 是一个长度为batch size 的list
+        print("features", features)
 
         batch_dialogue = []
-        batch_system_prompt = []
+        task_ids = []
 
         for messages in features:
             if isinstance(messages,tuple) and len(messages)==3 and messages[-1]=="<|CustomData|>":
@@ -183,8 +184,8 @@ class DialogueDataCollator:
                 dialogue = messages
                 dialogue = [{"from": "user", "value": dialogue[i]} if i%2==0 else {"from": "assistant", "value": dialogue[i]} for i, t in enumerate(dialogue)]
                 batch_dialogue.append(dialogue)
-                batch_system_prompt.append(self.system_prefix)
+                task_ids.append(self.system_prefix)
         
-        batch_data = self.preprocess_internlm(batch_dialogue, batch_system_prompt)
+        batch_data = self.preprocess_internlm(batch_dialogue, task_ids)
 
         return batch_data
