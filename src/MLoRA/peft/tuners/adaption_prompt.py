@@ -22,8 +22,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from src.ft_chatglm_lora.peft.utils.config import PeftConfig, PeftType
-from src.ft_chatglm_lora.peft.utils.other import _freeze_adapter, _get_submodules
+from .. import PeftConfig, PeftType
+from .utils import _freeze_adapter, _get_submodules
 
 
 def llama_rotate_half(x: torch.Tensor) -> torch.Tensor:
