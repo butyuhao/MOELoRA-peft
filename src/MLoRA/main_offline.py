@@ -49,7 +49,7 @@ from src.ft_chatglm_ptuning.tokenization_chatglm import ChatGLMTokenizer
 from src.ft_chatglm_ptuning.configuration_chatglm import ChatGLMConfig
 from src.ft_chatglm_ptuning.modeling_chatglm import ChatGLMForConditionalGeneration
 from src.ft_chatglm_lora.trainer_seq2seq import Seq2SeqTrainer
-from src.ft_chatglm_lora.arguments import ModelArguments, DataTrainingArguments
+from transformers.models.llama import ModelArguments, DataTrainingArguments
 
 from peft import PeftModel, LoraConfig, TaskType, get_peft_model, get_peft_model_state_dict
 

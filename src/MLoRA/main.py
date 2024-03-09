@@ -43,9 +43,9 @@ from src.MLoRA.trainer_seq2seq import Seq2SeqTrainer
 from src.MLoRA.peft import PeftModel, TaskType, get_peft_model
 from src.MLoRA.peft import LoraConfig, AdaLoraConfig
 from src.MLoRA.peft import MMOELoraConfigS
-from src.data_processor.chatglm import chatglm1_train, chatglm1_eval
-from src.data_processor.chatglm2 import chatglm2_train, chatglm2_eval
-from src.data_processor.collator import LongestSequenceCollator
+# from src.data_processor.chatglm import chatglm1_train, chatglm1_eval
+# from src.data_processor.chatglm2 import chatglm2_train, chatglm2_eval
+# from src.data_processor.collator import LongestSequenceCollator
 from utils.custom_datasets.dialogue_collator import DialogueDataCollator
 from utils.utils_oa import get_dataset
 

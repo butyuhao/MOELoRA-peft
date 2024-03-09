@@ -125,7 +125,7 @@ class Seq2SeqTrainer(Trainer):
             - metrics (`Dict[str, float]`, *optional*): The potential dictionary of metrics (if the dataset contained
               labels).
         """
-
+        print("predict")
         gen_kwargs = gen_kwargs.copy()
         if gen_kwargs.get("max_length") is None and gen_kwargs.get("max_new_tokens") is None:
             gen_kwargs["max_length"] = self.args.generation_max_length
@@ -164,6 +164,7 @@ class Seq2SeqTrainer(Trainer):
             Tuple[Optional[float], Optional[torch.Tensor], Optional[torch.Tensor]]: A tuple with the loss, logits and
             labels (each being optional).
         """
+        print("prediction_step")
 
         if not self.args.predict_with_generate or prediction_loss_only:
             return super().prediction_step(
