@@ -46,8 +46,8 @@ from src.MLoRA.peft import MMOELoraConfigS
 # from src.data_processor.chatglm import chatglm1_train, chatglm1_eval
 # from src.data_processor.chatglm2 import chatglm2_train, chatglm2_eval
 # from src.data_processor.collator import LongestSequenceCollator
-from utils.custom_datasets.dialogue_collator import DialogueDataCollator
-from utils.utils_oa import get_dataset
+from .utils.custom_datasets.dialogue_collator import DialogueDataCollator
+from .utils.utils_oa import get_dataset
 
 logger = logging.getLogger(__name__)
 

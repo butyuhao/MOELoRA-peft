@@ -20,7 +20,7 @@ from .peft_model import (
     PeftModelForSequenceClassification,
     PeftModelForTokenClassification,
     PeftModelForCausalLMShared,
-    PeftModelForCausalLMSharedM,
+    # PeftModelForCausalLMSharedM,
 )
 from .tuners import (
     AdaLoraConfig,
@@ -40,7 +40,7 @@ MODEL_TYPE_TO_PEFT_MODEL_MAPPING = {
     "CAUSAL_LM": PeftModelForCausalLM,  # shared causal lm PeftModelForCausalLMShared
     "TOKEN_CLS": PeftModelForTokenClassification,
     "CAUSAL_LMS": PeftModelForCausalLMShared,
-    "CAUSAL_LMSM": PeftModelForCausalLMSharedM, 
+    # "CAUSAL_LMSM": PeftModelForCausalLMSharedM, 
 }
 
 PEFT_TYPE_TO_CONFIG_MAPPING = {

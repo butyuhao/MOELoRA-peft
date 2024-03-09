@@ -4,7 +4,7 @@ from typing import Optional, Union
 
 import numpy as np
 import torch
-from model_training.custom_datasets.formatting import QA_SPECIAL_TOKENS, format_pairs, format_system_prefix
+from .formatting import QA_SPECIAL_TOKENS, format_pairs, format_system_prefix
 from torch.nn import functional as F
 from transformers.tokenization_utils_base import PaddingStrategy, PreTrainedTokenizerBase, TruncationStrategy
 import transformers
@@ -27,17 +27,7 @@ class DialogueDataCollator:
     tokenizer: PreTrainedTokenizerBase
     # padding: Union[bool, str, PaddingStrategy] = True
     max_len: Optional[int] = None
-    system_prefix = '''你是一个人工智能助手，名字叫EduChat。
-- EduChat是一个由华东师范大学开发的对话式语言模型。
-EduChat的工具
-- Web search: Disable.
-- Calculators: Disable.
-EduChat的能力
-- Inner Thought: Disable.
-对话主题
-- General: Enable.
-- Psychology: Disable.
-- Socrates: Disable.'''
+    system_prefix = ''''''
 
     def preprocess(
         self,
