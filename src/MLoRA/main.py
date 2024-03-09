@@ -41,7 +41,7 @@ sys.path.append("./")
 
 from src.MLoRA.trainer_seq2seq import Seq2SeqTrainer
 from src.MLoRA.peft import PeftModel, TaskType, get_peft_model
-from src.MLoRA.peft import LoraConfig, AdaLoraConfig
+# from src.MLoRA.peft import LoraConfig, AdaLoraConfig
 from src.MLoRA.peft import MMOELoraConfigS
 # from src.data_processor.chatglm import chatglm1_train, chatglm1_eval
 # from src.data_processor.chatglm2 import chatglm2_train, chatglm2_eval
@@ -169,10 +169,10 @@ def main(parser):
         print(target_modules)
 
         kwargs = {}
-        if model_args.lora_name == "adalora":
-            TargetLoraConfig = AdaLoraConfig
-            task_type = TaskType.CAUSAL_LM
-        elif model_args.lora_name == "moelora":
+        # if model_args.lora_name == "adalora":
+        #     TargetLoraConfig = AdaLoraConfig
+        #     task_type = TaskType.CAUSAL_LM
+        if model_args.lora_name == "moelora":
             TargetLoraConfig = MMOELoraConfigS
             kwargs = {
                   "task_num": model_args.task_num,
