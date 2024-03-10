@@ -152,7 +152,8 @@ def main(parser):
     config.pre_seq_len = model_args.pre_seq_len
     config.prefix_projection = model_args.prefix_projection
 
-    model = AutoModel.from_pretrained(
+    from .llama.modeling_llama import LlamaForCausalLM
+    model = LlamaForCausalLM(config).from_pretrained(
         model_args.model_name_or_path,
         trust_remote_code=True
     ).half().cuda()    # .half() represents to use half of orginal accuracy
