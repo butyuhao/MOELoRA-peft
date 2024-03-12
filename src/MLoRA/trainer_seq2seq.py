@@ -125,7 +125,7 @@ class Seq2SeqTrainer(Trainer):
             - metrics (`Dict[str, float]`, *optional*): The potential dictionary of metrics (if the dataset contained
               labels).
         """
-        print("predict")
+        # print("predict")
         gen_kwargs = gen_kwargs.copy()
         if gen_kwargs.get("max_length") is None and gen_kwargs.get("max_new_tokens") is None:
             gen_kwargs["max_length"] = self.args.generation_max_length
@@ -136,7 +136,40 @@ class Seq2SeqTrainer(Trainer):
 
 
         return super().predict(test_dataset, ignore_keys=ignore_keys, metric_key_prefix=metric_key_prefix)
+    def compute_loss(self, model, inputs, return_outputs=False):
+        """
+        How the loss is computed by Trainer. By default, all models return the loss in the first element.
 
+        Subclass and override for custom behavior.
+        """
+        # print("compute_loss_called")
+        if self.label_smoother is not None and "labels" in inputs:
+            labels = inputs.pop("labels")
+        else:
+            labels = None
+        
+        # print("inputs", inputs)
+        outputs = model(**inputs)
+        # Save past state if it exists
+        # TODO: this needs to be fixed and made cleaner later.
+        if self.args.past_index >= 0:
+            self._past = outputs[self.args.past_index]
+
+        if labels is not None:
+            if unwrap_model(model)._get_name() in MODEL_FOR_CAUSAL_LM_MAPPING_NAMES.values():
+                loss = self.label_smoother(outputs, labels, shift_labels=True)
+            else:
+                loss = self.label_smoother(outputs, labels)
+        else:
+            if isinstance(outputs, dict) and "loss" not in outputs:
+                raise ValueError(
+                    "The model did not return a loss from the inputs, only the following keys: "
+                    f"{','.join(outputs.keys())}. For reference, the inputs it received are {','.join(inputs.keys())}."
+                )
+            # We don't use .loss here since the model may return tuples instead of ModelOutput.
+            loss = outputs["loss"] if isinstance(outputs, dict) else outputs[0]
+
+        return (loss, outputs) if return_outputs else loss
     def prediction_step(
         self,
         model: nn.Module,
@@ -164,7 +197,7 @@ class Seq2SeqTrainer(Trainer):
             Tuple[Optional[float], Optional[torch.Tensor], Optional[torch.Tensor]]: A tuple with the loss, logits and
             labels (each being optional).
         """
-        print("prediction_step")
+        # print("prediction_step")
 
         if not self.args.predict_with_generate or prediction_loss_only:
             return super().prediction_step(
@@ -208,6 +241,7 @@ class Seq2SeqTrainer(Trainer):
             gen_kwargs["depart"] = inputs["depart"]
         if "entity" in inputs.keys():
             gen_kwargs["entity"] = inputs["entity"]
+        
         generated_tokens = self.model.generate(**gen_kwargs)
         generated_tokens = generated_tokens[:, generation_inputs.size()[-1]:]
 

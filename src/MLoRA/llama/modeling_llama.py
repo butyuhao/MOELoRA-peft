@@ -199,7 +199,7 @@ class LlamaMLP(nn.Module):
         self.down_proj = nn.Linear(self.intermediate_size, self.hidden_size, bias=False)
         self.act_fn = ACT2FN[config.hidden_act]
 
-    def forward(self, x):
+    def forward(self, x, **kwargs):
         if self.config.pretraining_tp > 1:
             slice = self.intermediate_size // self.config.pretraining_tp
             gate_proj_slices = self.gate_proj.weight.split(slice, dim=0)
@@ -217,7 +217,7 @@ class LlamaMLP(nn.Module):
             ]
             down_proj = sum(down_proj)
         else:
-            down_proj = self.down_proj(self.act_fn(self.gate_proj(x)) * self.up_proj(x))
+            down_proj = self.down_proj(self.act_fn(self.gate_proj(x, **kwargs)) * self.up_proj(x, **kwargs), **kwargs)
 
         return down_proj
 
@@ -286,10 +286,13 @@ class LlamaAttention(nn.Module):
         past_key_value: Optional[Tuple[torch.Tensor]] = None,
         output_attentions: bool = False,
         use_cache: bool = False,
+        **kwargs,
     ) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple[torch.Tensor]]]:
         bsz, q_len, _ = hidden_states.size()
+        #print("llamaattention")
 
         if self.config.pretraining_tp > 1:
+            #print("pretraining_tp")
             key_value_slicing = (self.num_key_value_heads * self.head_dim) // self.config.pretraining_tp
             query_slices = self.q_proj.weight.split(
                 (self.num_heads * self.head_dim) // self.config.pretraining_tp, dim=0
@@ -307,9 +310,9 @@ class LlamaAttention(nn.Module):
             value_states = torch.cat(value_states, dim=-1)
 
         else:
-            query_states = self.q_proj(hidden_states)
-            key_states = self.k_proj(hidden_states)
-            value_states = self.v_proj(hidden_states)
+            query_states = self.q_proj(hidden_states,**kwargs)
+            key_states = self.k_proj(hidden_states,**kwargs)
+            value_states = self.v_proj(hidden_states,**kwargs)
 
         query_states = query_states.view(bsz, q_len, self.num_heads, self.head_dim).transpose(1, 2)
         key_states = key_states.view(bsz, q_len, self.num_key_value_heads, self.head_dim).transpose(1, 2)
@@ -365,7 +368,7 @@ class LlamaAttention(nn.Module):
             o_proj_slices = self.o_proj.weight.split(self.hidden_size // self.config.pretraining_tp, dim=1)
             attn_output = sum([F.linear(attn_output[i], o_proj_slices[i]) for i in range(self.config.pretraining_tp)])
         else:
-            attn_output = self.o_proj(attn_output)
+            attn_output = self.o_proj(attn_output,**kwargs)
 
         if not output_attentions:
             attn_weights = None
@@ -390,6 +393,7 @@ class LlamaDecoderLayer(nn.Module):
         past_key_value: Optional[Tuple[torch.Tensor]] = None,
         output_attentions: Optional[bool] = False,
         use_cache: Optional[bool] = False,
+        task_id: Optional[torch.Tensor] = None,
     ) -> Tuple[torch.FloatTensor, Optional[Tuple[torch.FloatTensor, torch.FloatTensor]]]:
         """
         Args:
@@ -409,6 +413,10 @@ class LlamaDecoderLayer(nn.Module):
 
         hidden_states = self.input_layernorm(hidden_states)
 
+        #print("kwargs1", task_id)
+        kwargs = {}
+        kwargs["task_id"] = task_id
+
         # Self Attention
         hidden_states, self_attn_weights, present_key_value = self.self_attn(
             hidden_states=hidden_states,
@@ -417,13 +425,15 @@ class LlamaDecoderLayer(nn.Module):
             past_key_value=past_key_value,
             output_attentions=output_attentions,
             use_cache=use_cache,
+            **kwargs,
         )
         hidden_states = residual + hidden_states
 
         # Fully Connected
         residual = hidden_states
         hidden_states = self.post_attention_layernorm(hidden_states)
-        hidden_states = self.mlp(hidden_states)
+        hidden_states = self.mlp(hidden_states, **kwargs)
+        #print("after mlp")
         hidden_states = residual + hidden_states
 
         outputs = (hidden_states,)
@@ -612,7 +622,9 @@ class LlamaModel(LlamaPreTrainedModel):
         output_attentions: Optional[bool] = None,
         output_hidden_states: Optional[bool] = None,
         return_dict: Optional[bool] = None,
+        **kwargs,
     ) -> Union[Tuple, BaseModelOutputWithPast]:
+        #print("pos2")
         output_attentions = output_attentions if output_attentions is not None else self.config.output_attentions
         output_hidden_states = (
             output_hidden_states if output_hidden_states is not None else self.config.output_hidden_states
@@ -671,7 +683,7 @@ class LlamaModel(LlamaPreTrainedModel):
         all_hidden_states = () if output_hidden_states else None
         all_self_attns = () if output_attentions else None
         next_decoder_cache = () if use_cache else None
-
+        #print("kwargs2", kwargs)
         for idx, decoder_layer in enumerate(self.layers):
             if output_hidden_states:
                 all_hidden_states += (hidden_states,)
@@ -683,7 +695,7 @@ class LlamaModel(LlamaPreTrainedModel):
                 def create_custom_forward(module):
                     def custom_forward(*inputs):
                         # None for past_key_value
-                        return module(*inputs, past_key_value, output_attentions)
+                        return module(*inputs, output_attentions, None, kwargs["task_id"])
 
                     return custom_forward
 
@@ -692,6 +704,7 @@ class LlamaModel(LlamaPreTrainedModel):
                     hidden_states,
                     attention_mask,
                     position_ids,
+                    None,
                 )
             else:
                 layer_outputs = decoder_layer(
@@ -701,6 +714,7 @@ class LlamaModel(LlamaPreTrainedModel):
                     past_key_value=past_key_value,
                     output_attentions=output_attentions,
                     use_cache=use_cache,
+                    task_id=kwargs["task_id"],
                 )
 
             hidden_states = layer_outputs[0]
@@ -772,7 +786,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
         output_attentions: Optional[bool] = None,
         output_hidden_states: Optional[bool] = None,
         return_dict: Optional[bool] = None,
-        task_id=None,
+        task_id: Optional[torch.Tensor] = None,
     ) -> Union[Tuple, CausalLMOutputWithPast]:
         r"""
         Args:
@@ -807,7 +821,12 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
         # decoder outputs consists of (dec_features, layer_state, dec_hidden, dec_attn)
-        print("task_id", task_id)
+        kwargs = {}
+        if task_id is not None:
+            kwargs["task_id"] = task_id
+        #print("kwargs", kwargs)
+        
+        #print("position1")
         
         outputs = self.model(
             input_ids=input_ids,
@@ -819,6 +838,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
             output_attentions=output_attentions,
             output_hidden_states=output_hidden_states,
             return_dict=return_dict,
+            **kwargs,
         )
 
         hidden_states = outputs[0]

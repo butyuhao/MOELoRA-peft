@@ -116,7 +116,6 @@ class MMOELoraModelS(MMOELoraModel):
             )
 
 
-
 class MMOELoraLinearS(MMOELoraLinear):
 
     def __init__(self, 
@@ -155,8 +154,10 @@ class MMOELoraLinearS(MMOELoraLinear):
 
     def forward(self, x: torch.Tensor, **kwargs):
         expert_weight = kwargs["task_id"]
-        previous_dtype = x.dtype
 
+
+        previous_dtype = x.dtype
+        # print("active_adapter", self.active_adapter)
         if self.active_adapter not in self.lora_A.keys():   # No adapter, directly use linear
             return F.linear(x, transpose(self.weight, self.fan_in_fan_out), bias=self.bias)
         if self.disable_adapters:   # No adapter
@@ -174,7 +175,7 @@ class MMOELoraLinearS(MMOELoraLinear):
                         self.lora_A[self.active_adapter].loraA[i](self.lora_dropout[self.active_adapter](x)),
                     )
                     * self.scaling[self.active_adapter]
-                    * expert_weight[..., i].unsqueeze(-1).unsqueeze(0)
+                    * expert_weight[..., i].unsqueeze(-1).unsqueeze(-1)
                 )
         else:
             result = F.linear(x, transpose(self.weight, self.fan_in_fan_out), bias=self.bias)

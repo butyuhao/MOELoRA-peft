@@ -294,6 +294,7 @@ class MMOELoraLinear(nn.Linear, MMOELoraLayer):
 
     def forward(self, x: torch.Tensor, **kwargs):
         task_id = kwargs["task_id"]
+        print("task_id_forward", task_id)
         previous_dtype = x.dtype
 
         if self.active_adapter not in self.lora_A.keys():   # No adapter, directly use linear

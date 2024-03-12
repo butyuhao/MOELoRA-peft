@@ -51,6 +51,8 @@ from src.MLoRA.peft import MMOELoraConfigS
 from .utils.custom_datasets.dialogue_collator import DialogueDataCollator
 from .utils.utils_oa import get_dataset
 
+#os.environ["WANDB_DISABLED"] = "true"
+
 logger = logging.getLogger(__name__)
 
 def main(parser):
@@ -141,7 +143,15 @@ def main(parser):
     data_conf = data_conf[data_args.data_config]
 
     train_dataset, eval_dataset = get_dataset(data_conf)
-    print("train_dataset", train_dataset[0])
+    # print("train_dataset")
+    # length_list = []
+    # for d in train_dataset:
+    #     length_list.append(len(tokenizer.tokenize("".join(d[0]))))
+    # import torch
+    # torch.save(length_list, "length_list.pt")
+    # exit()
+
+
     data_collator = DialogueDataCollator(tokenizer=tokenizer, max_len=data_args.max_source_length)
 
     # Load pretrained model and tokenizer
@@ -383,7 +393,7 @@ def main(parser):
         checkpoint = None
         if training_args.resume_from_checkpoint is not None:
             checkpoint = training_args.resume_from_checkpoint
-        model.gradient_checkpointing_enable()
+        # model.gradient_checkpointing_enable()
         model.enable_input_require_grads()
         train_result = trainer.train(resume_from_checkpoint=checkpoint)
 

@@ -1194,6 +1194,9 @@ class PeftModelForCausalLMShared(PeftModelForCausalLM):
         self.task_num = peft_config.task_num
         self.te_dim = peft_config.task_embedding_dim
         self.active_adapter = adapter_name
+        #print("peft_config", peft_config)
+        #print("task_num", self.task_num)
+        #print("expert_num", self.expert_num)
 
         self.lora_task_embedding = nn.ModuleDict({})
         self.lora_gate = nn.ModuleDict({})
@@ -1215,14 +1218,25 @@ class PeftModelForCausalLMShared(PeftModelForCausalLM):
 
         if kwargs["task_id"] is not None:
             task_id = kwargs["task_id"]
+            
+            #("task_id1", task_id)
             if len(task_id.shape) < 2:  # one-hot
                 expert_weight = self.lora_gate[self.active_adapter](self.lora_task_embedding[self.active_adapter](task_id))
             else:   # multi-hot (bs, max_len)
                 task_emb = self.lora_task_embedding[self.active_adapter](task_id)   # (bs, max_len, em_dim)
+                #print("task_emb", task_emb.shape)
+                #print(task_emb)
                 multi_mask = (task_id>0)   # (bs, max_len)
+                #print("multi_task", multi_task)
                 task_emb = task_emb * multi_mask.unsqueeze(-1)  # (bs, max_len, em_dim)
+                #print("task_emb", task_emb.shape)
+                #print(task_emb)
                 task_emb = torch.sum(task_emb, dim=1) / torch.sum(multi_mask, dim=-1, keepdim=True)    # (bs, em_dim) / (bs, 1) = (bs, em_dim)
+                #print("task_emb", task_emb.shape)
+                #print(task_emb)
                 expert_weight = self.lora_gate[self.active_adapter](task_emb) # (bs, 1)
+                
+            #print("expert_weight.shape", expert_weight.shape)
             kwargs["task_id"] = expert_weight
 
         if not isinstance(peft_config, PromptLearningConfig):

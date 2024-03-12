@@ -17,7 +17,6 @@ import transformers
 from transformers.trainer_pt_utils import LabelSmoother
 IGNORE_TOKEN_ID = -100
 
-
 @dataclass
 class DialogueDataCollator:
     """
@@ -60,7 +59,7 @@ class DialogueDataCollator:
             input_id += system
             target += [im_start] + [IGNORE_TOKEN_ID] * (len(system)-3) + [im_end] + nl_tokens
 
-            print([im_start] + [IGNORE_TOKEN_ID] * (len(system)-3) + [im_end] + nl_tokens)
+
             assert len(input_id) == len(target)
             for j, sentence in enumerate(source):
                 role = roles[sentence["from"]]
@@ -169,16 +168,25 @@ class DialogueDataCollator:
         # print(tokenizer.convert_ids_to_tokens(input_id))
         # print(input_id)
         # print(target)
-        print(input_ids)
+        # print(input_ids)
         input_ids = torch.tensor(input_ids, dtype=torch.long)
         targets = torch.tensor(targets, dtype=torch.long)
         task_ids = torch.tensor(task_ids, dtype=torch.long)
+
+        # batch_data = dict(
+        #     input_ids=input_ids,
+        #     labels=targets,
+        #     attention_mask=input_ids.ne(0),
+        #     task_id=task_ids
+        # )
+
+        # print("batch_data", batch_data)
 
         return dict(
             input_ids=input_ids,
             labels=targets,
             attention_mask=input_ids.ne(0),
-            task_ids=task_ids
+            task_id=task_ids
         )
 
 
