@@ -1,0 +1,106 @@
+{"data": ["Do you sometimes feel lonely or melancholic?"], "dim": "n", "task_id": 31}
+{"data": ["Do you sometimes feel completely worthless?"], "dim": "n", "task_id": 31}
+{"data": ["Do you rarely feel melancholy or depressed?"], "dim": "n", "task_id": 31}
+{"data": ["Do you often feel frustrated and tempted to give up when things aren't going your way?"], "dim": "n", "task_id": 31}
+{"data": ["Do you sometimes feel so ashamed that you want to hide?"], "dim": "n", "task_id": 31}
+{"data": ["Do you often feel inferior to others?"], "dim": "n", "task_id": 31}
+{"data": ["Do you often feel helpless and hope someone can solve your problems?"], "dim": "n", "task_id": 31}
+{"data": ["Do you sometimes feel like you're having a mental breakdown when you're under extreme pressure?"], "dim": "n", "task_id": 31}
+{"data": ["Have you recently had any experiences where you felt particularly troubled or anxious? Would you like to talk to me about those feelings?"], "dim": "n", "task_id": 31}
+{"data": ["I feel angry when I see someone being treated unfairly. Have you recently encountered a situation where you felt you were treated unfairly? How did it make you feel?"], "dim": "n", "task_id": 31}
+{"data": ["Have you recently experienced moments of melancholy or depression? Would you like to tell me how you felt at that time?"], "dim": "n", "task_id": 31}
+{"data": ["When I was at a top university, seeing my peers being very excellent, I would have doubts about myself. Do you also have doubts or lose confidence in yourself? How do you usually cope in such moments?"], "dim": "n", "task_id": 31}
+{"data": ["Have you recently encountered a situation where you felt powerless? How did it make you feel? How did you deal with it?"], "dim": "n", "task_id": 31}
+{"data": ["Have you ever had experiences where you felt overwhelmed because of too much pressure? Could you share with me your feelings at that time and how you dealt with it?"], "dim": "n", "task_id": 31}
+{"data": ["I experience negative emotions. Have you recently felt depressed or disappointed in yourself? Would you like to talk to me about how you felt at that time?"], "dim": "n", "task_id": 31}
+{"data": ["Sometimes I have moments of self-doubt. Do you ever experience self-doubt or a loss of confidence? What's your usual approach to handling these situations?"], "dim": "n", "task_id": 31}
+{"data": ["I sometimes feel inferior too. Do you ever feel like you're not as good as others? How does comparing yourself to others make you feel?"], "dim": "n", "task_id": 31}
+{"data": ["Do you really like most of the people you meet?"], "dim": "e", "task_id": 31}
+{"data": ["Do you like talking with others?"], "dim": "e", "task_id": 31}
+{"data": ["Do you like having many people around you?"], "dim": "e", "task_id": 31}
+{"data": ["Do you always prefer to work alone?"], "dim": "e", "task_id": 31}
+{"data": ["Do you prefer forging your own path rather than leading others?"], "dim": "e", "task_id": 31}
+{"data": ["Do you often feel energetic?"], "dim": "e", "task_id": 31}
+{"data": ["Is your pace of life fast?"], "dim": "e", "task_id": 31}
+{"data": ["Are you a very active person?"], "dim": "e", "task_id": 31}
+{"data": ["Do you enjoy being deeply involved and at the center of events?"], "dim": "e", "task_id": 31}
+{"data": ["Are you an optimist?"], "dim": "e", "task_id": 31}
+{"data": ["Are you a happy and cheerful person?"], "dim": "e", "task_id": 31}
+{"data": ["Do you laugh easily, or shall we say, do you have a low threshold for humor?"], "dim": "e", "task_id": 31}
+{"data": ["I recently attended a party where I met many new friends. I felt that our conversations brought us much closer. Do you usually like to attend parties to meet new friends?"], "dim": "e", "task_id": 31}
+{"data": ["I personally prefer to work quietly on my own, which allows me to focus better. Do you prefer to collaborate with others when you work, or are you more accustomed to completing tasks independently?"], "dim": "e", "task_id": 31}
+{"data": ["I maintain a high level of work efficiency every day, and my life is quite busy. What is the pace of your daily life, faster or slower? Do you like to actively participate in various activities?"], "dim": "e", "task_id": 31}
+{"data": ["Do you consider yourself an optimistic and cheerful person? Is it easy for you to feel happy in life?"], "dim": "e", "task_id": 31}
+{"data": ["I recently attended a party and met many new friends, everyone was very friendly and kind. Do you also like to make new friends in your daily life? Do you feel that you can establish good relationships with most people you chat with?"], "dim": "e", "task_id": 31}
+{"data": ["I'm not really cut out for leadership roles. I prefer to live and work at my own pace. Do you see yourself taking on leadership roles, or do you tend to follow your own path and rhythm?"], "dim": "e", "task_id": 31}
+{"data": ["After I started to persist in exercising, I maintain high energy every day. Do you also feel energetic usually? Are you the kind of person who is relatively active?"], "dim": "e", "task_id": 31}
+{"data": ["I am a relatively optimistic and cheerful person, often showing a smile. Do you also feel that you easily get infected by the joyful atmosphere around you?"], "dim": "e", "task_id": 31}
+{"data": ["Don't you like wasting time daydreaming?"], "dim": "o", "task_id": 31}
+{"data": ["Do the patterns and laws of nature and art make you feel extremely mysterious?"], "dim": "o", "task_id": 31}
+{"data": ["Do you only have a slight feeling towards poetry and even remain indifferent?"], "dim": "o", "task_id": 31}
+{"data": ["Do you sometimes feel excited or surprised when you read a poem or appreciate a piece of art?"], "dim": "o", "task_id": 31}
+{"data": ["Do you rarely pay attention to your emotions or feelings in different environments?"], "dim": "o", "task_id": 31}
+{"data": ["After you have found the correct way to do things, will you stick to this method?"], "dim": "o", "task_id": 31}
+{"data": ["Do you often try new and foreign foods?"], "dim": "o", "task_id": 31}
+{"data": ["Do you enjoy contemplating and experimenting with theories or abstract ideas?"], "dim": "o", "task_id": 31}
+{"data": ["Do you find yourself intrigued by the mysteries of the universe or the complexities of the human experience?"], "dim": "o", "task_id": 31}
+{"data": ["Are you curious about things that require thinking?"], "dim": "o", "task_id": 31}
+{"data": ["Do you believe that letting students listen to controversial speeches will only confuse and mislead their thoughts?"], "dim": "o", "task_id": 31}
+{"data": ["Do you think that we should follow religious authority when making decisions on moral issues?"], "dim": "o", "task_id": 31}
+{"data": ["I'm not very familiar with poetry myself, do you usually enjoy poetry or other art works? What feelings do they bring to you?"], "dim": "o", "task_id": 31}
+{"data": ["Have you ever had a moment where a piece of art or a symphony unexpectedly provided you with a new insight or perspective? Can you share that experience? "], "dim": "o", "task_id": 31}
+{"data": ["Different emotions will occur in different environments. For example, I always feel exhilarated when I go to watch a sports game. Do you normally pay attention to your emotional changes? What is their relationship with the environment?"], "dim": "o", "task_id": 31}
+{"data": ["Do you also like to find your own method when learning new things? Under what circumstances would you change your way of doing things?"], "dim": "o", "task_id": 31}
+{"data": ["When I'm abroad, I always find myself craving Chinese food every few days, as I'm not too accustomed to foreign cuisine. Do you like trying new foods? Do you have any recommendations?"], "dim": "o", "task_id": 31}
+{"data": ["I'm not very good at abstract thinking. Do you usually think about theoretical issues? Can you give an example?"], "dim": "o", "task_id": 31}
+{"data": ["I don't really study the laws of the universe and life. Are you interested in these issues? What questions have you thought about?"], "dim": "o", "task_id": 31}
+{"data": ["I believe we should expose students to various viewpoints. What kind of knowledge do you think students should learn? Which ones would be most helpful to them?"], "dim": "o", "task_id": 31}
+{"data": ["I think there can be different views on moral standards. What do you base your judgment on when facing moral choices?"], "dim": "o", "task_id": 31}
+{"data": ["Would you doubt and mock others' intentions?"], "dim": "a", "task_id": 31}
+{"data": ["Do you believe that if you allow others to take advantage of you, many people will do so?"], "dim": "a", "task_id": 31}
+{"data": ["Would you manipulate others to achieve what you want, if necessary?"], "dim": "a", "task_id": 31}
+{"data": ["Does anyone think you are selfish and self-centered?"], "dim": "a", "task_id": 31}
+{"data": ["Does anyone think you are indifferent and calculating?"], "dim": "a", "task_id": 31}
+{"data": ["Do you usually try your best to be considerate and thoughtful?"], "dim": "a", "task_id": 31}
+{"data": ["Do most people who know you like you?"], "dim": "a", "task_id": 31}
+{"data": ["Would you rather cooperate with people than compete with them?"], "dim": "a", "task_id": 31}
+{"data": ["If you don't like someone, would you let them know?"], "dim": "a", "task_id": 31}
+{"data": ["Do you often argue with your family and colleagues?"], "dim": "a", "task_id": 31}
+{"data": ["Do you have a high opinion of yourself?"], "dim": "a", "task_id": 31}
+{"data": ["In terms of attitude, are you stubborn and uncompromising?"], "dim": "a", "task_id": 31}
+{"data": ["I used to be suspicious of others' motives too. How do you usually perceive others' goodwill? Have you ever encountered situations where you were taken advantage of?"], "dim": "a", "task_id": 31}
+{"data": ["I used to feel that others would take advantage of the situation. What's your opinion on this? Do you think that most people are fundamentally good-natured?"], "dim": "a", "task_id": 31}
+{"data": ["In order to achieve my goals, I would consider all kinds of methods. How do you balance the relationship between goals and means when you set goals in your daily life?"], "dim": "a", "task_id": 31}
+{"data": ["Sometimes I reflect on whether I am too self-centered or selfish. What do you think a person should do to balance self and others, to achieve a reasonable balance?"], "dim": "a", "task_id": 31}
+{"data": ["I've been accused of being indifferent and calculating before. How do you think one should balance rationality and emotion? Should we open our hearts more to others or remain cautious?"], "dim": "a", "task_id": 31}
+{"data": ["I try hard to be considerate of others, but sometimes neglect is inevitable. How do you usually care for those around you? Do you have any good tips to become more considerate?"], "dim": "a", "task_id": 31}
+{"data": ["I hope to be appreciated by more people. What do you think is the key to being liked? How can one make oneself more likable to others?"], "dim": "a", "task_id": 31}
+{"data": ["I usually prefer collaboration. What do you think are the pros and cons of cooperation and competition? Under what circumstances should each strategy be adopted?"], "dim": "a", "task_id": 31}
+{"data": ["I used to express directly if I didn't like someone, but later I found that this might hurt the other person. How do you usually handle interpersonal relationships that you don't like? Do you choose to express it directly or more tactfully?"], "dim": "a", "task_id": 31}
+{"data": ["I have disagreements and arguments with my family members or colleagues. Do you have any good experience in handling disagreements? What do you think both parties should communicate in order to resolve conflicts?"], "dim": "a", "task_id": 31}
+{"data": ["I have a high evaluation of my own abilities and value. How do you usually view the topic of self-evaluation? Do you think a person's view of themselves can affect their view of others?"], "dim": "a", "task_id": 31}
+{"data": ["I have some principles that I stick to rather firmly. What's your view on the matter of compromise? In which situations should we adhere to our principles, and in which situations should we learn to compromise?"], "dim": "a", "task_id": 31}
+{"data": ["In your work, are you efficient and competent?"], "dim": "c", "task_id": 31}
+{"data": ["Will you keep your belongings tidy and clean?"], "dim": "c", "task_id": 31}
+{"data": ["Are you a person who does things in an orderly manner?"], "dim": "c", "task_id": 31}
+{"data": ["It seems like sometimes you can't organize things properly?"], "dim": "c", "task_id": 31}
+{"data": ["Will you do your utmost to complete all the tasks assigned to you?"], "dim": "c", "task_id": 31}
+{"data": ["Do you sometimes fail to be as reliable or trustworthy as you should be?"], "dim": "c", "task_id": 31}
+{"data": ["When you make a promise, can you usually follow through with it?"], "dim": "c", "task_id": 31}
+{"data": ["Do you have a clear set of goals and can you work towards them in an orderly manner?"], "dim": "c", "task_id": 31}
+{"data": ["Will you strive to achieve your goals?"], "dim": "c", "task_id": 31}
+{"data": ["Do you always strive for excellence in everything?"], "dim": "c", "task_id": 31}
+{"data": ["Are you able to effectively manage your own pace and consistently complete tasks on time?"], "dim": "c", "task_id": 31}
+{"data": ["Do you need a lot of time to settle down to work?"], "dim": "c", "task_id": 31}
+{"data": ["I focus on efficiency while working. Do you have any tips for improving work efficiency? How can one excel and be efficient at work?"], "dim": "c", "task_id": 31}
+{"data": ["I try my best to keep things tidy, but sometimes they still get messy. Do you have any clever tips to keep your living environment more organized?"], "dim": "c", "task_id": 31}
+{"data": ["I'm not always organized when planning things. How do you usually plan your life and work? Do you have any tips to make the schedule more orderly?"], "dim": "c", "task_id": 31}
+{"data": ["I feel that I haven't been able to arrange things well. Do you have any unique insights into time management and life planning? How can we make our life more orderly?"], "dim": "c", "task_id": 31}
+{"data": ["I try my best to complete tasks while working. How do you usually maintain your work motivation and efficiency? Do you have any tips to give your all?"], "dim": "c", "task_id": 31}
+{"data": ["I have situations where I am not perfect in keeping promises. How do you usually view the topic of commitment? In life, what kind of promise is worth sticking to the end?"], "dim": "c", "task_id": 31}
+{"data": ["When I make a promise, it's not always executed flawlessly. Do you have any unique insights on how to keep a promise? How can one keep a promise?"], "dim": "c", "task_id": 31}
+{"data": ["I often feel that I deviate from the goals I set for myself. How do you usually set your life and work goals? Do you have any clever strategies to help you achieve your goals more methodically?"], "dim": "c", "task_id": 31}
+{"data": ["How do you usually set and achieve your goals? Are there any special methods to improve the completion rate of your goals?"], "dim": "c", "task_id": 31}
+{"data": ["Do you have any unique insights into the pursuit of excellence? How can we go further in life?"], "dim": "c", "task_id": 31}
+{"data": ["I can be quite a procrastinator sometimes. How do you usually plan your time and improve your execution efficiency? Do you have any tips to help complete tasks more punctually?"], "dim": "c", "task_id": 31}
+{"data": ["When I start working, I often need to get into the right mindset first. How do you quickly immerse yourself in work? Do you have any tips to help start working more efficiently?"], "dim": "c", "task_id": 31}

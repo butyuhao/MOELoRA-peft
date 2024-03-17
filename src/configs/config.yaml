@@ -1,3 +1,9 @@
+bigfive_task_test:
+  cache_dir: /cpfs01/user/chenqin.p/dyh/cache_dir
+  datasets:
+    - bigfive_task_test:
+        val_split: 0
+
 bigfive_task:
   cache_dir: /cpfs01/user/chenqin.p/dyh/cache_dir
   datasets:

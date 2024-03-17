@@ -25,6 +25,7 @@ import sys
 
 import jieba
 import numpy as np
+import torch
 import transformers
 from datasets import load_dataset
 from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
@@ -138,11 +139,6 @@ def main(parser):
         trust_remote_code=True,
     )
 
-    data_conf = read_yamls("/cpfs01/user/chenqin.p/dyh/MOELoRA-peft/src/configs")
-    print(data_conf)
-    data_conf = data_conf[data_args.data_config]
-
-    train_dataset, eval_dataset = get_dataset(data_conf)
     # print("train_dataset")
     # length_list = []
     # for d in train_dataset:
@@ -211,7 +207,7 @@ def main(parser):
         )
         model = get_peft_model(model, peft_config)
     
-
+    print("Trainable Parameters")
     model.print_trainable_parameters()
 
     task_flag = False   # flag whether generate task_id from dataset
@@ -279,6 +275,12 @@ def main(parser):
         #         load_from_cache_file=False,
         #         desc="Running tokenizer on train dataset",
         #     )
+        data_conf = read_yamls("/cpfs01/user/chenqin.p/dyh/MOELoRA-peft/src/configs")
+        print(data_conf)
+        data_conf = data_conf[data_args.data_config]
+
+        train_dataset, eval_dataset = get_dataset(data_conf)
+        
         print_dataset_example(train_dataset[0])
         print_dataset_example(train_dataset[1])
         # train_dataset.set_format("torch")
@@ -303,26 +305,37 @@ def main(parser):
         print_dataset_example(eval_dataset[0])
         print_dataset_example(eval_dataset[1])
 
-    # if training_args.do_predict:
-    #     max_target_length = data_args.val_max_target_length
-    #     if "test" not in raw_datasets:
-    #         raise ValueError("--do_predict requires a test dataset")
-    #     predict_dataset = raw_datasets["test"]
-    #     if data_args.max_predict_samples is not None:
-    #         max_predict_samples = min(len(predict_dataset), data_args.max_predict_samples)
-    #         predict_dataset = predict_dataset.select(range(max_predict_samples))
-    #     with training_args.main_process_first(desc="prediction dataset map pre-processing"):
-    #         predict_dataset = predict_dataset.map(
-    #             preprocess_function_eval,
-    #             batched=True,
-    #             num_proc=data_args.preprocessing_num_workers,
-    #             remove_columns=column_names,
-    #             load_from_cache_file=False,
-    #             desc="Running tokenizer on prediction dataset",
-    #         )
-    #     print_dataset_example(predict_dataset[0])
-    #     print_dataset_example(predict_dataset[1])
-    #     predict_dataset.set_format("torch")
+    if training_args.do_predict:
+        # max_target_length = data_args.val_max_target_length
+        # if "test" not in raw_datasets:
+        #     raise ValueError("--do_predict requires a test dataset")
+        # predict_dataset = raw_datasets["test"]
+        # if data_args.max_predict_samples is not None:
+        #     max_predict_samples = min(len(predict_dataset), data_args.max_predict_samples)
+        #     predict_dataset = predict_dataset.select(range(max_predict_samples))
+        # with training_args.main_process_first(desc="prediction dataset map pre-processing"):
+        #     predict_dataset = predict_dataset.map(
+        #         preprocess_function_eval,
+        #         batched=True,
+        #         num_proc=data_args.preprocessing_num_workers,
+        #         remove_columns=column_names,
+        #         load_from_cache_file=False,
+        #         desc="Running tokenizer on prediction dataset",
+        #     )
+        # print_dataset_example(predict_dataset[0])
+        # print_dataset_example(predict_dataset[1])
+        # predict_dataset.set_format("torch")
+        
+        data_conf = read_yamls("/cpfs01/user/chenqin.p/dyh/MOELoRA-peft/src/configs")
+        print(data_conf)
+        data_conf = data_conf[data_args.data_config]
+
+        test_dataset, eval_dataset = get_dataset(data_conf)
+        train_dataset = None
+        
+        print_dataset_example(test_dataset[0])
+        print_dataset_example(test_dataset[1])
+        print("len(eval_dataset)", len(eval_dataset))
 
     # Data collator
     label_pad_token_id = -100 if data_args.ignore_pad_token_for_loss else tokenizer.pad_token_id
@@ -339,14 +352,15 @@ def main(parser):
     if training_args.do_train:
         # data_collator = LongestSequenceCollator(tokenizer, task_flag, depart_flag)
         data_collator = DialogueDataCollator(tokenizer=tokenizer, max_len=data_args.max_source_length)
-    else:
-        data_collator = DataCollatorForSeq2Seq(
-            tokenizer,
-            model=model,
-            label_pad_token_id=label_pad_token_id,
-            pad_to_multiple_of=None,
-            padding=False
-        )
+    elif training_args.do_predict:
+        # data_collator = DataCollatorForSeq2Seq(
+        #     tokenizer,
+        #     model=model,
+        #     label_pad_token_id=label_pad_token_id,
+        #     pad_to_multiple_of=None,
+        #     padding=False
+        # )
+        data_collator = DialogueDataCollator(tokenizer=tokenizer, max_len=data_args.max_source_length)
 
     # Metric
     def compute_metrics(eval_preds):
@@ -422,14 +436,31 @@ def main(parser):
         logger.info("*** Predict ***")
 
         # 读取原test file
-        list_test_samples = []
-        with open(data_args.test_file, "r", encoding="utf-8") as f:
-            for line in f:
-                line = json.loads(line)
-                list_test_samples.append(line)
+        # list_test_samples = []
+        # with open(data_args.test_file, "r", encoding="utf-8") as f:
+        #     for line in f:
+        #         line = json.loads(line)
+        #         list_test_samples.append(line)
+        import pandas as pd
+        # df = pd.read_excel(data_args.test_file)
+
+        # Extract the "question_en" column into a list
+        # question_en_list = df['question_en'].tolist()
+        # dim_list = df['dimension'].tolist()
+        # input_ids = tokenizer("随便生成一段话", return_tensors="pt").cuda()
+        # result = model.generate(input_ids)
+        # print("result", result)
+        # print("result", tokenizer.convert_ids_to_tokens(result))
+
+        data_line = data_collator([test_dataset[0]])
+        print("data_line", data_line)
+        input_ids = data_line["input_ids"].cuda()
+        task_id = data_line["task_id"].cuda()
+        result = model.base_model.generate(input_ids, task_id=task_id)
+        print("result", result)
 
         predict_results = trainer.predict(
-            predict_dataset,
+            test_dataset,
             metric_key_prefix="predict",
             # max_tokens=512,
             max_new_tokens=data_args.max_target_length,
@@ -438,6 +469,7 @@ def main(parser):
             temperature=0.95,
             # repetition_penalty=1.1
         )
+        print(predict_results)
         metrics = predict_results.metrics
         print(metrics)
         max_predict_samples = (
@@ -454,18 +486,26 @@ def main(parser):
                     predict_results.predictions, skip_special_tokens=True, clean_up_tokenization_spaces=True
                 )
                 predictions = [pred.strip() for pred in predictions]
-                labels = tokenizer.batch_decode(
-                    predict_results.label_ids, skip_special_tokens=True, clean_up_tokenization_spaces=True
-                )
-                labels = [label.strip() for label in labels]
-                assert len(labels) == len(list_test_samples)
+                # labels = tokenizer.batch_decode(
+                #     predict_results.label_ids, skip_special_tokens=True, clean_up_tokenization_spaces=True
+                # )
+                # labels = [label.strip() for label in labels]
+                # assert len(labels) == len(list_test_samples)
 
                 output_prediction_file = os.path.join(training_args.output_dir, "test_predictions.json")
 
+                # with open(output_prediction_file, "w", encoding="utf-8") as writer:
+                #     for idx, (p, l) in enumerate(zip(predictions, labels)):
+                #         samp = list_test_samples[idx]
+                #         samp["target"] = p
+                #         res = json.dumps(samp, ensure_ascii=False)
+                #         writer.write(f"{res}\n")
+
                 with open(output_prediction_file, "w", encoding="utf-8") as writer:
-                    for idx, (p, l) in enumerate(zip(predictions, labels)):
-                        samp = list_test_samples[idx]
+                    for idx, p in enumerate(predictions):
+                        samp = question_en_list[i]
                         samp["target"] = p
+                        samp["dim"] = dim_list[i]
                         res = json.dumps(samp, ensure_ascii=False)
                         writer.write(f"{res}\n")
 

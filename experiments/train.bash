@@ -3,8 +3,8 @@ lora_trainable="gate_proj,k_proj,o_proj,down_proj,v_proj,q_proj,up_proj"
 modules_to_save="null"
 lora_dropout=0.1
 LR=2e-4
-MAX_STEPS=8000
-SAVE_STEPS=8000
+MAX_STEPS=4000
+SAVE_STEPS=500
 MASTER_PORT=$(shuf -n 1 -i 10000-65535)
 model_name_or_path="/cpfs01/user/chenqin.p/model_cached/Llama-2-7b-chat-hf"   
 your_data_path="data"  
@@ -29,7 +29,7 @@ deepspeed --num_gpus=4 --master_port $MASTER_PORT run_mlora.py \
     --max_target_length 196 \
     --per_device_train_batch_size 1 \
     --per_device_eval_batch_size 1 \
-    --gradient_accumulation_steps 32 \
+    --gradient_accumulation_steps 8 \
     --max_steps ${MAX_STEPS} \
     --logging_steps 100 \
     --save_steps ${SAVE_STEPS} \

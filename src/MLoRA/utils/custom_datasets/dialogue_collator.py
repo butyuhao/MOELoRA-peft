@@ -184,8 +184,8 @@ class DialogueDataCollator:
 
         return dict(
             input_ids=input_ids,
-            labels=targets,
-            attention_mask=input_ids.ne(0),
+            # labels=targets,
+            # attention_mask=input_ids.ne(0),
             task_id=task_ids
         )
 
