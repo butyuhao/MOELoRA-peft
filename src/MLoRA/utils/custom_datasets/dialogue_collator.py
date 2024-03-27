@@ -100,7 +100,8 @@ class DialogueDataCollator:
     def preprocess_llama(
         self,
         sources,
-        task_ids
+        task_ids,
+        system_message=None
     ) -> Dict:
         roles = {"user": "<s>user", "assistant": "<s>assistant"}
         tokenizer = self.tokenizer
@@ -127,10 +128,10 @@ class DialogueDataCollator:
             input_id, target = [], []
 
             # add system prompt
-
-            # system = [im_start] + _system + tokenizer(system_message).input_ids[1:] + [im_end] + nl_tokens
-            # input_id += system
-            # target += [im_start] + [IGNORE_TOKEN_ID] * (len(system)-3) + [im_end] + nl_tokens
+            if system_message is not None:
+                system = [im_start] + _system + tokenizer(system_message).input_ids[1:] + [im_end] 
+                input_id += system
+                target += [im_start] + _system + [IGNORE_TOKEN_ID] * (len(system)-3) + [im_end] 
             # <s>user xxx</s> <s>assistant XXX</s>
 
             assert len(input_id) == len(target)
@@ -184,8 +185,8 @@ class DialogueDataCollator:
 
         return dict(
             input_ids=input_ids,
-            # labels=targets,
-            # attention_mask=input_ids.ne(0),
+            labels=targets,
+            attention_mask=input_ids.ne(0),
             task_id=task_ids
         )
 
@@ -197,18 +198,28 @@ class DialogueDataCollator:
         batch_dialogue = []
         task_ids = []
 
+        system_message = None
+
         for messages in features:
             if isinstance(messages,tuple) and len(messages)==3 and messages[-1]=="<|CustomData|>":
                 dialogue = messages[0]
                 dialogue = [{"from": "user", "value": dialogue[i]} if i%2==0 else {"from": "assistant", "value": dialogue[i]} for i, t in enumerate(dialogue)]
                 batch_dialogue.append(dialogue)
                 task_ids.append(int(messages[1]))
+            elif isinstance(messages,tuple) and len(messages)==4 and messages[-1]=="<|CustomData|>":
+                dialogue = messages[0]
+                dialogue = [{"from": "user", "value": dialogue[i]} if i%2==0 else {"from": "assistant", "value": dialogue[i]} for i, t in enumerate(dialogue)]
+                batch_dialogue.append(dialogue)
+                task_ids.append(int(messages[1]))
+                system_message = messages[2]
             else:
                 dialogue = messages
                 dialogue = [{"from": "user", "value": dialogue[i]} if i%2==0 else {"from": "assistant", "value": dialogue[i]} for i, t in enumerate(dialogue)]
                 batch_dialogue.append(dialogue)
 
-        
-        batch_data = self.preprocess_llama(sources=batch_dialogue, task_ids=task_ids)
+        if system_message is not None:
+            batch_data = self.preprocess_llama(sources=batch_dialogue, task_ids=task_ids, system_message=system_message)
+        else:
+            batch_data = self.preprocess_llama(sources=batch_dialogue, task_ids=task_ids)
 
         return batch_data

@@ -41,10 +41,10 @@ peft_path=""
 #     --lora_name moelora \
 #     --expert_num 8
 
-deepspeed --num_gpus=4 --master_port $MASTER_PORT run_mlora.py \
+deepspeed --num_gpus=1 --master_port $MASTER_PORT run_mlora.py \
     --do_predict \
     --data_config bigfive_task_test \
-    --peft_path /cpfs01/user/chenqin.p/dyh/MOELoRA-peft/saved/moelora/checkpoint-500/adapter_model.bin \
+    --peft_path /cpfs01/user/chenqin.p/dyh/MOELoRA-peft/saved/moelora/checkpoint-1000/adapter_model.bin \
     --test_file /cpfs01/user/chenqin.p/dyh/MOELoRA-peft/data/bigfive_questionnaire.xlsx \
     --cache_dir $your_data_path \
     --overwrite_cache \
@@ -56,7 +56,7 @@ deepspeed --num_gpus=4 --master_port $MASTER_PORT run_mlora.py \
     --overwrite_output_dir \
     --max_source_length $MAX_SOURCE_LENGTH \
     --max_target_length 256 \
-    --per_device_eval_batch_size 4 \
+    --per_device_eval_batch_size 2 \
     --predict_with_generate \
     --lora_name moelora \
     --expert_num 10 \

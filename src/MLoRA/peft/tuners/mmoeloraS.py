@@ -155,7 +155,6 @@ class MMOELoraLinearS(MMOELoraLinear):
     def forward(self, x: torch.Tensor, **kwargs):
         expert_weight = kwargs["task_id"]
 
-
         previous_dtype = x.dtype
         # print("active_adapter", self.active_adapter)
         if self.active_adapter not in self.lora_A.keys():   # No adapter, directly use linear

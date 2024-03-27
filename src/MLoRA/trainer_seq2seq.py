@@ -197,7 +197,8 @@ class Seq2SeqTrainer(Trainer):
             Tuple[Optional[float], Optional[torch.Tensor], Optional[torch.Tensor]]: A tuple with the loss, logits and
             labels (each being optional).
         """
-        # print("prediction_step")
+        # print("prediction_step, input", inputs)
+        # eval use this
 
         if not self.args.predict_with_generate or prediction_loss_only:
             return super().prediction_step(
@@ -241,6 +242,8 @@ class Seq2SeqTrainer(Trainer):
             gen_kwargs["depart"] = inputs["depart"]
         if "entity" in inputs.keys():
             gen_kwargs["entity"] = inputs["entity"]
+        
+        print("gen_kwargs", gen_kwargs["task_id"])
         
         generated_tokens = self.model.generate(**gen_kwargs)
         generated_tokens = generated_tokens[:, generation_inputs.size()[-1]:]

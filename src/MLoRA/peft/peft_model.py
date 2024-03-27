@@ -1295,7 +1295,7 @@ class PeftModelForCausalLMShared(PeftModelForCausalLM):
     def generate(self, **kwargs):
         peft_config = self.active_peft_config
 
-        if kwargs["task_id"] is not None:
+        if "task_id" in kwargs:
             task_id = kwargs["task_id"]
             if len(task_id.shape) < 2:  # one-hot
                 expert_weight = self.lora_gate[self.active_adapter](self.lora_task_embedding[self.active_adapter](task_id))

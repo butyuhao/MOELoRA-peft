@@ -133,11 +133,17 @@ def main(parser):
             print(f"WARNING: No yaml files found in {dir}")
 
         return conf
-
-    tokenizer = AutoTokenizer.from_pretrained(
-        model_args.model_name_or_path,
-        trust_remote_code=True,
-    )
+    if training_args.do_predict:
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_args.model_name_or_path,
+            trust_remote_code=True,
+            padding_side='left'
+        )
+    else:
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_args.model_name_or_path,
+            trust_remote_code=True,
+        )
 
     # print("train_dataset")
     # length_list = []
@@ -158,11 +164,22 @@ def main(parser):
     config.pre_seq_len = model_args.pre_seq_len
     config.prefix_projection = model_args.prefix_projection
 
-    from .llama.modeling_llama import LlamaForCausalLM
-    model = LlamaForCausalLM(config).from_pretrained(
-        model_args.model_name_or_path,
-        trust_remote_code=True
-    ).half().cuda()    # .half() represents to use half of orginal accuracy
+
+    if not model_args.use_no_peft:
+        print("init revised llama")
+        from .llama.modeling_llama import LlamaForCausalLM
+        model = LlamaForCausalLM(config).from_pretrained(
+            model_args.model_name_or_path,
+            trust_remote_code=True
+        ).half().cuda()    # .half() represents to use half of orginal accuracy
+    else:
+        print("init original llama")
+        from transformers.models.llama.modeling_llama import LlamaForCausalLM
+        model = LlamaForCausalLM(config).from_pretrained(
+            model_args.model_name_or_path,
+            trust_remote_code=True
+        ).half().cuda()
+    
 
     if model_args.peft_path is not None:
         logger.info("Peft from pre-trained model")
@@ -171,7 +188,7 @@ def main(parser):
             model = PeftModel.from_pretrained(model, model_args.peft_path, is_trainable=True)
         else:
             model = PeftModel.from_pretrained(model, model_args.peft_path, is_trainable=False)
-    else:
+    elif not model_args.use_no_peft:
         logger.info("Init new peft model")
         target_modules = model_args.trainable.split(',')
         modules_to_save = model_args.modules_to_save.split(',') if model_args.modules_to_save!="null" else None
@@ -206,9 +223,13 @@ def main(parser):
             **kwargs
         )
         model = get_peft_model(model, peft_config)
-    
+
+    print("model type", type(model))
+
+
     print("Trainable Parameters")
-    model.print_trainable_parameters()
+    if not model_args.use_no_peft:
+        model.print_trainable_parameters()
 
     task_flag = False   # flag whether generate task_id from dataset
     depart_flag = False  # flag whether use the department and entity
@@ -452,62 +473,99 @@ def main(parser):
         # print("result", result)
         # print("result", tokenizer.convert_ids_to_tokens(result))
 
-        data_line = data_collator([test_dataset[0]])
-        print("data_line", data_line)
-        input_ids = data_line["input_ids"].cuda()
-        task_id = data_line["task_id"].cuda()
-        result = model.base_model.generate(input_ids, task_id=task_id)
-        print("result", result)
+        prediction_list = []
+        from tqdm import tqdm
+        for data_point in tqdm(test_dataset):
+            
 
-        predict_results = trainer.predict(
-            test_dataset,
-            metric_key_prefix="predict",
-            # max_tokens=512,
-            max_new_tokens=data_args.max_target_length,
-            do_sample=True,
-            top_p=0.7,
-            temperature=0.95,
-            # repetition_penalty=1.1
-        )
-        print(predict_results)
-        metrics = predict_results.metrics
-        print(metrics)
-        max_predict_samples = (
-            data_args.max_predict_samples if data_args.max_predict_samples is not None else len(predict_dataset)
-        )
-        metrics["predict_samples"] = min(max_predict_samples, len(predict_dataset))
+            if model_args.use_no_peft:
+                system_message = "You are to assume the role of an individual characterized by specific traits within the Big Five personality framework. The Big Five personality traits consist of Openness, Conscientiousness, Extraversion, Agreeableness, and Neuroticism. Each trait can be exhibited at high or low levels. In this scenario, you will portray a person who demonstrates high Openness, high Conscientiousness, high Extraversion, high Agreeableness, and high Neuroticism. respond within 30 words."
+                data_point = list(data_point)
+                data_point[2] = system_message
+                data_point.append("<|CustomData|>")
+                data_point = tuple(data_point)
+            data_line = data_collator([data_point])
+            # print("data_line", data_line)
+            input_ids = data_line["input_ids"].cuda()
+            task_id = torch.tensor([31], dtype=torch.long).cuda()
+            
+            if not model_args.use_no_peft: 
+                result = model.generate(
+                    input_ids=input_ids,
+                    task_id=task_id,
+                    max_new_tokens=50,
+                    do_sample=True,
+                    top_p=0.3,
+                    temperature=0.8,
+                )
+            else:
+                result = model.generate(
+                    input_ids=input_ids,
+                    max_new_tokens=50,
+                    do_sample=True,
+                    top_p=0.3,
+                    temperature=0.8,
+                )
+            cur_result = tokenizer.convert_tokens_to_string(tokenizer.convert_ids_to_tokens(result.cpu()[0]))
+            prediction_list.append(cur_result)
+
+            # except Exception as e:
+            #     print(f"An error occurred: {e}")
+            #     print(data_point[0][0])
+            #     prediction_list.append(data_point[0][0])
+
+        torch.save(prediction_list, "./prediction_31_step1000.pt")
+        
+
+        # predict_results = trainer.predict(
+        #     test_dataset,
+        #     metric_key_prefix="predict",
+        #     # max_tokens=512,
+        #     max_new_tokens=data_args.max_target_length,
+        #     do_sample=True,
+        #     top_p=0.3,
+        #     temperature=0.5,
+        #     # repetition_penalty=1.1
+        # )
+        # print(predict_results)
+        # metrics = predict_results.metrics
+        # print(metrics)
+        # max_predict_samples = (
+        #     data_args.max_predict_samples if data_args.max_predict_samples is not None else len(predict_dataset)
+        # )
+        # metrics["predict_samples"] = min(max_predict_samples, len(predict_dataset))
 
         #trainer.log_metrics("predict", metrics)
         #trainer.save_metrics("predict", metrics)
 
-        if trainer.is_world_process_zero():
-            if training_args.predict_with_generate:
-                predictions = tokenizer.batch_decode(
-                    predict_results.predictions, skip_special_tokens=True, clean_up_tokenization_spaces=True
-                )
-                predictions = [pred.strip() for pred in predictions]
-                # labels = tokenizer.batch_decode(
-                #     predict_results.label_ids, skip_special_tokens=True, clean_up_tokenization_spaces=True
-                # )
-                # labels = [label.strip() for label in labels]
-                # assert len(labels) == len(list_test_samples)
+        # if trainer.is_world_process_zero():
+        #     if training_args.predict_with_generate:
+        #         predictions = tokenizer.batch_decode(
+        #             predict_results.predictions, skip_special_tokens=True, clean_up_tokenization_spaces=True
+        #         )
+        #         predictions = [pred.strip() for pred in predictions]
+        #         # labels = tokenizer.batch_decode(
+        #         #     predict_results.label_ids, skip_special_tokens=True, clean_up_tokenization_spaces=True
+        #         # )
+        #         # labels = [label.strip() for label in labels]
+        #         # assert len(labels) == len(list_test_samples)
 
-                output_prediction_file = os.path.join(training_args.output_dir, "test_predictions.json")
+        #         output_prediction_file = os.path.join(training_args.output_dir, "test_predictions.json")
 
-                # with open(output_prediction_file, "w", encoding="utf-8") as writer:
-                #     for idx, (p, l) in enumerate(zip(predictions, labels)):
-                #         samp = list_test_samples[idx]
-                #         samp["target"] = p
-                #         res = json.dumps(samp, ensure_ascii=False)
-                #         writer.write(f"{res}\n")
+        #         # with open(output_prediction_file, "w", encoding="utf-8") as writer:
+        #         #     for idx, (p, l) in enumerate(zip(predictions, labels)):
+        #         #         samp = list_test_samples[idx]
+        #         #         samp["target"] = p
+        #         #         res = json.dumps(samp, ensure_ascii=False)
+        #         #         writer.write(f"{res}\n")
 
-                with open(output_prediction_file, "w", encoding="utf-8") as writer:
-                    for idx, p in enumerate(predictions):
-                        samp = question_en_list[i]
-                        samp["target"] = p
-                        samp["dim"] = dim_list[i]
-                        res = json.dumps(samp, ensure_ascii=False)
-                        writer.write(f"{res}\n")
+        #         with open(output_prediction_file, "w", encoding="utf-8") as writer:
+        #             for idx, p in enumerate(predictions):
+        #                 samp = question_en_list[i]
+        #                 samp["target"] = p
+        #                 samp["dim"] = dim_list[i]
+        #                 res = json.dumps(samp, ensure_ascii=False)
+        #                 writer.write(f"{res}\n")
 
     return results
 

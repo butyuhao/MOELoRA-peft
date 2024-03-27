@@ -824,7 +824,9 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
         kwargs = {}
         if task_id is not None:
             kwargs["task_id"] = task_id
-        #print("kwargs", kwargs)
+        else:
+            print("no task_id")
+
         
         #print("position1")
         
@@ -903,6 +905,12 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
                 "attention_mask": attention_mask,
             }
         )
+        if "task_id" in kwargs:
+            model_inputs.update({
+                "task_id": kwargs["task_id"]
+            })
+        else:
+            print("no task id when preparing inputs for generation")
         return model_inputs
 
     @staticmethod
