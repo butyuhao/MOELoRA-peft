@@ -10,7 +10,6 @@ model_name_or_path="/cpfs01/user/chenqin.p/model_cached/Llama-2-7b-chat-hf"
 your_data_path="data"  
 your_checkpopint_path="saved/moelora"  
 MAX_SOURCE_LENGTH=512
-peft_path=""  
 
 # # Training Command
 # deepspeed --num_gpus=4 --master_port $MASTER_PORT run_mlora.py \
@@ -44,14 +43,13 @@ peft_path=""
 deepspeed --num_gpus=1 --master_port $MASTER_PORT run_mlora.py \
     --do_predict \
     --data_config bigfive_task_test \
-    --peft_path /cpfs01/user/chenqin.p/dyh/MOELoRA-peft/saved/moelora/checkpoint-1000/adapter_model.bin \
+    --peft_path /cpfs01/user/chenqin.p/model_cached/saved/moelora/checkpoint-3000/ \
     --test_file /cpfs01/user/chenqin.p/dyh/MOELoRA-peft/data/bigfive_questionnaire.xlsx \
     --cache_dir $your_data_path \
     --overwrite_cache \
     --prompt_column input \
     --response_column target \
     --model_name_or_path $model_name_or_path \
-    --peft_path $your_checkpopint_path/checkpoint-${MAX_STEPS} \
     --output_dir results/pred/moelora \
     --overwrite_output_dir \
     --max_source_length $MAX_SOURCE_LENGTH \

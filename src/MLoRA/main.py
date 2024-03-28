@@ -454,67 +454,90 @@ def main(parser):
         trainer.save_metrics("eval", metrics)
 
     if training_args.do_predict:
+        
+
+        def decimal_to_5bit_binary(number):
+            # Convert the decimal number to binary and remove the '0b' prefix
+            binary_str = bin(number)[2:]
+            # Pad the binary string to 5 bits
+            binary_5bit = binary_str.zfill(5)
+            return binary_5bit
+
         logger.info("*** Predict ***")
 
-        # 读取原test file
-        # list_test_samples = []
-        # with open(data_args.test_file, "r", encoding="utf-8") as f:
-        #     for line in f:
-        #         line = json.loads(line)
-        #         list_test_samples.append(line)
-        import pandas as pd
-        # df = pd.read_excel(data_args.test_file)
+        for t_id in range(32):
 
-        # Extract the "question_en" column into a list
-        # question_en_list = df['question_en'].tolist()
-        # dim_list = df['dimension'].tolist()
-        # input_ids = tokenizer("随便生成一段话", return_tensors="pt").cuda()
-        # result = model.generate(input_ids)
-        # print("result", result)
-        # print("result", tokenizer.convert_ids_to_tokens(result))
+            # 读取原test file
+            # list_test_samples = []
+            # with open(data_args.test_file, "r", encoding="utf-8") as f:
+            #     for line in f:
+            #         line = json.loads(line)
+            #         list_test_samples.append(line)
+            import pandas as pd
+            # df = pd.read_excel(data_args.test_file)
 
-        prediction_list = []
-        from tqdm import tqdm
-        for data_point in tqdm(test_dataset):
+            # Extract the "question_en" column into a list
+            # question_en_list = df['question_en'].tolist()
+            # dim_list = df['dimension'].tolist()
+            # input_ids = tokenizer("随便生成一段话", return_tensors="pt").cuda()
+            # result = model.generate(input_ids)
+            # print("result", result)
+            # print("result", tokenizer.convert_ids_to_tokens(result))
+            model.cuda()
+            prediction_list = []
+            from tqdm import tqdm
+            for data_point in tqdm(test_dataset):
+                if model_args.use_no_peft:
+                    system_message = "You are to assume the role of an individual characterized by specific traits within the Big Five personality framework. The Big Five personality traits consist of Openness, Conscientiousness, Extraversion, Agreeableness, and Neuroticism. Each trait can be exhibited at high or low levels. In this scenario, you will portray a person who demonstrates high Openness, high Conscientiousness, high Extraversion, high Agreeableness, and high Neuroticism. respond within 30 words."
+                    data_point = list(data_point)
+                    data_point[2] = system_message
+                    data_point.append("<|CustomData|>")
+                    data_point = tuple(data_point)
+                data_line = data_collator([data_point])
+                # print("data_line", data_line)
+                input_ids = data_line["input_ids"].cuda()
+                task_id = torch.tensor([t_id], dtype=torch.long).cuda()
+                
+                if not model_args.use_no_peft: 
+                    result = model.generate(
+                        input_ids=input_ids,
+                        task_id=task_id,
+                        max_new_tokens=50,
+                        do_sample=True,
+                        top_p=0.3,
+                        temperature=0.8,
+                    )
+                else:
+                    result = model.generate(
+                        input_ids=input_ids,
+                        max_new_tokens=50,
+                        do_sample=True,
+                        top_p=0.3,
+                        temperature=0.8,
+                    )
+                cur_result = tokenizer.convert_tokens_to_string(tokenizer.convert_ids_to_tokens(result.cpu()[0]))
+                prediction_list.append(cur_result)
+
+                # except Exception as e:
+                #     print(f"An error occurred: {e}")
+                #     print(data_point[0][0])
+                #     prediction_list.append(data_point[0][0])
             
+            prediction_list = [r.split("<s> assistant")[1].strip().strip("</s>").strip() for r in prediction_list]
 
-            if model_args.use_no_peft:
-                system_message = "You are to assume the role of an individual characterized by specific traits within the Big Five personality framework. The Big Five personality traits consist of Openness, Conscientiousness, Extraversion, Agreeableness, and Neuroticism. Each trait can be exhibited at high or low levels. In this scenario, you will portray a person who demonstrates high Openness, high Conscientiousness, high Extraversion, high Agreeableness, and high Neuroticism. respond within 30 words."
-                data_point = list(data_point)
-                data_point[2] = system_message
-                data_point.append("<|CustomData|>")
-                data_point = tuple(data_point)
-            data_line = data_collator([data_point])
-            # print("data_line", data_line)
-            input_ids = data_line["input_ids"].cuda()
-            task_id = torch.tensor([31], dtype=torch.long).cuda()
+            df = pd.read_excel("/cpfs01/user/chenqin.p/dyh/MOELoRA-peft/data/bigfive_questionnaire.xlsx")
+            question_list = df["question_en"].to_list()
+            dimensions = df["dimension"].to_list()
+
+            assert len(dimensions) == len(prediction_list)
+
+            output_list = []
+            for i in range(len(prediction_list)):
+                output_list.append({"dimension": dimensions[i], "response": prediction_list[i]})
             
-            if not model_args.use_no_peft: 
-                result = model.generate(
-                    input_ids=input_ids,
-                    task_id=task_id,
-                    max_new_tokens=50,
-                    do_sample=True,
-                    top_p=0.3,
-                    temperature=0.8,
-                )
-            else:
-                result = model.generate(
-                    input_ids=input_ids,
-                    max_new_tokens=50,
-                    do_sample=True,
-                    top_p=0.3,
-                    temperature=0.8,
-                )
-            cur_result = tokenizer.convert_tokens_to_string(tokenizer.convert_ids_to_tokens(result.cpu()[0]))
-            prediction_list.append(cur_result)
+            os.makedirs("./eval/moe/step3000/", exist_ok=True)
 
-            # except Exception as e:
-            #     print(f"An error occurred: {e}")
-            #     print(data_point[0][0])
-            #     prediction_list.append(data_point[0][0])
-
-        torch.save(prediction_list, "./prediction_31_step1000.pt")
+            torch.save(output_list, f"./eval/moe/step3000/{decimal_to_5bit_binary(t_id)}.pt")
         
 
         # predict_results = trainer.predict(
