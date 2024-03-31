@@ -9,6 +9,14 @@ bigfive_task:
   datasets:
     - bigfive_task_id:
         val_split: 0.2
+    - bigfive_task_id_questionnaire:
+        val_split: 0
+
+bigfive_task_q:
+  cache_dir: /cpfs01/user/chenqin.p/dyh/cache_dir
+  datasets:
+    - bigfive_task_id_questionnaire:
+        val_split: 0
 
 
 educhat-hq-2-24:

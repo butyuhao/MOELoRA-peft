@@ -535,9 +535,9 @@ def main(parser):
             for i in range(len(prediction_list)):
                 output_list.append({"dimension": dimensions[i], "response": prediction_list[i]})
             
-            os.makedirs("./eval/moe/step3000/", exist_ok=True)
+            os.makedirs("./eval/moe/2experts/", exist_ok=True)
 
-            torch.save(output_list, f"./eval/moe/step3000/{decimal_to_5bit_binary(t_id)}.pt")
+            torch.save(output_list, f"./eval/moe/2experts/{decimal_to_5bit_binary(t_id)}.pt")
         
 
         # predict_results = trainer.predict(
