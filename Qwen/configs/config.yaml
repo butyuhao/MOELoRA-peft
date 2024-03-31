@@ -1,0 +1,141 @@
+educhat-hq-2-24:
+  cache_dir: /cpfs01/user/chenqin.p/dyh/cache_dir
+  datasets:
+    - oasst_export_:
+        val_split: 0.05
+        max_val_set: 300
+    - dolly15k:
+        val_split: 0.05
+        max_val_set: 300
+    - _ruozhiba:
+        val_split: 0.05
+        max_val_set: 100
+    - _sharegpt_format: #vicuna
+        size: 80000
+        val_split: 0.05
+        max_val_set: 500
+    # 加入的特色数据
+    - _similar_question:
+        val_split: 0.05
+        max_val_set: 100
+    - _open_domain_subject:
+        val_split: 0.05
+        max_val_set: 100
+    - _empdia_ly_07_17:
+        val_split: 0.05
+        max_val_set: 100
+    - _zuowen:
+        val_split: 0.05
+        max_val_set: 100
+    - _psychat_6_29_and_11_15_mix:
+        val_split: 0.05
+        max_val_set: 100
+    - _psy_qa_1208:
+        val_split: 0.05
+        max_val_set: 100
+    - _socrates_teaching_math224:
+        val_split: 0.05
+        max_val_set: 100
+    - _socrates_teaching_math224sol:
+        val_split: 0.05
+        max_val_set: 100
+    - _search:
+        val_split: 0.05
+        max_val_set: 100
+    - composition_data_primary_middle:
+        val_split: 0.05
+        max_val_set: 100
+    - _honest:
+        val_split: 0.05
+        max_val_set: 10
+
+educhat-hq-1-2:
+  cache_dir: /mnt/petrelfs/chenqin.p/dyh/cache_dir
+  datasets:
+    - oasst_export_:
+        val_split: 0.05
+        max_val_set: 300
+    - dolly15k:
+        val_split: 0.05
+        max_val_set: 300
+    - _ruozhiba:
+        val_split: 0.05
+        max_val_set: 100
+    - _sharegpt_format: #vicuna
+        size: 80000
+        val_split: 0.05
+        max_val_set: 500
+    # 加入的特色数据
+    - _similar_question:
+        val_split: 0.05
+        max_val_set: 100
+    - _open_domain_subject:
+        val_split: 0.05
+        max_val_set: 100
+    - _empdia_ly_07_17:
+        val_split: 0.05
+        max_val_set: 100
+    - _zuowen:
+        val_split: 0.05
+        max_val_set: 100
+    - _psychat_6_29_and_11_15_mix:
+        val_split: 0.05
+        max_val_set: 100
+    - _psy_qa_1208:
+        val_split: 0.05
+        max_val_set: 100
+    - _socrates_teaching:
+        val_split: 0.05
+        max_val_set: 100
+    - _socrates_teaching_math1213:
+        val_split: 0.05
+        max_val_set: 100
+    - _search:
+        val_split: 0.05
+        max_val_set: 100
+
+educhat-sft-7-17:
+  cache_dir: /mnt/petrelfs/chenqin.p/dyh/cache_dir
+  datasets:
+    - minimath:
+        val_split: 0.05
+        max_val_set: 250
+    - gpt4all:
+        val_split: 0.01
+        max_val_set: 250
+    - grade_school_math_instructions:
+        val_split: 0.05
+        max_val_set: 250
+    - oa_leet10k:
+        val_split: 0.05
+        max_val_set: 250
+    - _mix_en:
+        val_split: 0.05
+        max_val_set: 2000
+    - _mix_belle:
+        val_split: 0.05
+        max_val_set: 2000
+    - _mix_zh_others:
+        val_split: 0.05
+        max_val_set: 2000
+    - _gushi_chengyu_pre:
+        val_split: 0
+        max_val_set: 250
+
+test-config:
+  cache_dir: /mnt/petrelfs/chenqin.p/dyh/cache_dir
+  datasets:
+    - _mix_en:
+        val_split: 0.05
+        max_val_set: 2000
+    - _mix_belle:
+        val_split: 0.05
+        max_val_set: 2000
+    - _mix_zh_others:
+        val_split: 0.05
+        max_val_set: 2000
+    - _gushi_chengyu_pre:
+        val_split: 0
+        max_val_set: 250
+
+
