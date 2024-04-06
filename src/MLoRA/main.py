@@ -43,7 +43,7 @@ import yaml
 sys.path.append("./")
 
 from src.MLoRA.trainer_seq2seq import Seq2SeqTrainer
-from src.MLoRA.peft import PeftModel, TaskType, get_peft_model
+
 # from src.MLoRA.peft import LoraConfig, AdaLoraConfig
 from src.MLoRA.peft import MMOELoraConfigS
 # from src.data_processor.chatglm import chatglm1_train, chatglm1_eval
@@ -64,6 +64,11 @@ def main(parser):
         model_args, data_args, training_args = parser.parse_json_file(json_file=os.path.abspath(sys.argv[1]))
     else:
         model_args, data_args, training_args = parser.parse_args_into_dataclasses()
+    
+    if model_args.use_peft:
+        from peft import get_peft_model, LoraConfig, TaskType
+    else:
+        from src.MLoRA.peft import PeftModel, TaskType, get_peft_model
 
     training_args.batched_training = data_args.batched_training # for batched training
     # if model_args.department:   # for the department
@@ -165,20 +170,21 @@ def main(parser):
     config.prefix_projection = model_args.prefix_projection
 
 
-    if not model_args.use_no_peft:
-        print("init revised llama")
-        from .llama.modeling_llama import LlamaForCausalLM
-        model = LlamaForCausalLM(config).from_pretrained(
-            model_args.model_name_or_path,
-            trust_remote_code=True
-        ).half().cuda()    # .half() represents to use half of orginal accuracy
-    else:
+    if model_args.use_original_llama: # 原版模型
         print("init original llama")
         from transformers.models.llama.modeling_llama import LlamaForCausalLM
         model = LlamaForCausalLM(config).from_pretrained(
             model_args.model_name_or_path,
             trust_remote_code=True
         ).half().cuda()
+        
+    else: # moe 模型
+        print("init revised llama")
+        from .llama.modeling_llama import LlamaForCausalLM
+        model = LlamaForCausalLM(config).from_pretrained(
+            model_args.model_name_or_path,
+            trust_remote_code=True
+        ).half().cuda()    # .half() represents to use half of orginal accuracy
     
 
     if model_args.peft_path is not None:
@@ -223,6 +229,20 @@ def main(parser):
             **kwargs
         )
         model = get_peft_model(model, peft_config)
+    elif model_args.use_peft:
+        
+        lora_config = LoraConfig(
+            r=lora_rank,
+            lora_alpha=lora_alpha,
+            target_modules=target_modules,
+            lora_dropout=lora_dropout,
+            task_type="CAUSAL_LM",
+            modules_to_save=modules_to_save  # This argument serves for adding new tokens.
+        )
+        
+        model = get_peft_model(model, lora_config)
+        
+
 
     print("model type", type(model))
 
@@ -535,9 +555,9 @@ def main(parser):
             for i in range(len(prediction_list)):
                 output_list.append({"dimension": dimensions[i], "response": prediction_list[i]})
             
-            os.makedirs("./eval/moe/2experts/", exist_ok=True)
+            os.makedirs(model_args.test_output_path, exist_ok=True)
 
-            torch.save(output_list, f"./eval/moe/2experts/{decimal_to_5bit_binary(t_id)}.pt")
+            torch.save(output_list, os.path.join(model_args.test_output_path, f"{decimal_to_5bit_binary(t_id)}.pt"))
         
 
         # predict_results = trainer.predict(

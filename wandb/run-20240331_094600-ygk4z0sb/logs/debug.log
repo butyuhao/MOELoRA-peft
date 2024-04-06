@@ -79,3 +79,4 @@ Traceback (most recent call last):
   File "/cpfs01/user/chenqin.p/anaconda3/envs/moe/lib/python3.10/site-packages/requests/adapters.py", line 517, in send
     raise SSLError(e, request=request)
 requests.exceptions.SSLError: HTTPSConnectionPool(host='api.wandb.ai', port=443): Max retries exceeded with url: /graphql (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1007)')))
+2024-03-31 14:20:43,790 WARNING MsgRouterThr:3306724 [router.py:message_loop():77] message_loop has been closed

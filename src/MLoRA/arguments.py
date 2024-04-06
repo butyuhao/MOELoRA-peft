@@ -67,6 +67,18 @@ class ModelArguments:
         default=False
     )
 
+    use_peft: bool = field(
+        default=False
+    )
+
+    use_original_llama: bool = field(
+        default=False
+    )
+
+    test_output_path: Optional[str] = field(
+        default=""
+    )
+
     trainable: Optional[str] = field(default="q_proj,v_proj")
     lora_rank: Optional[int] = field(default=8)
     lora_dropout: Optional[float] = field(default=0.1)

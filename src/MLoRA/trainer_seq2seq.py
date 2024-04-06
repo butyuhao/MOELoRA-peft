@@ -147,7 +147,7 @@ class Seq2SeqTrainer(Trainer):
             labels = inputs.pop("labels")
         else:
             labels = None
-        
+        # inputs.pop("task_id")
         # print("inputs", inputs)
         outputs = model(**inputs)
         # Save past state if it exists
@@ -238,10 +238,6 @@ class Seq2SeqTrainer(Trainer):
         gen_kwargs["input_ids"] = generation_inputs
         if "task_id" in inputs.keys():
             gen_kwargs["task_id"] = inputs["task_id"]
-        if "depart" in inputs.keys():
-            gen_kwargs["depart"] = inputs["depart"]
-        if "entity" in inputs.keys():
-            gen_kwargs["entity"] = inputs["entity"]
         
         print("gen_kwargs", gen_kwargs["task_id"])
         

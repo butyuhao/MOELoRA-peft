@@ -3,7 +3,8 @@ from datasets import load_dataset, Dataset
 My_custom_data = {
 "bigfive_task_id":"/cpfs01/user/chenqin.p/dyh/MOELoRA-peft/data/bigfive_task_id.jsonl",
 "bigfive_task_id_questionnaire":"/cpfs01/user/chenqin.p/dyh/MOELoRA-peft/data/task_data_questionnaire.jsonl",
-"bigfive_task_test":"/cpfs01/user/chenqin.p/dyh/MOELoRA-peft/data/test.jsonl"
+"bigfive_task_test":"/cpfs01/user/chenqin.p/dyh/MOELoRA-peft/data/test.jsonl",
+"dimensional_task_id":"/cpfs01/user/chenqin.p/dyh/MOELoRA-peft/data/dimensional_task_id.jsonl"
 }
 
 class MyCustom(Dataset):
