@@ -22,7 +22,13 @@ bigfive_task_q:
 dimensional_task_q:
   cache_dir: /cpfs01/user/chenqin.p/dyh/cache_dir
   datasets:
-    - dimensional_task_id:
+    - dimensional_task_q:
+        val_split: 0
+
+dimensional_task_q_4_13:
+  cache_dir: /cpfs01/user/chenqin.p/dyh/cache_dir
+  datasets:
+    - dimensional_task_id_4_13:
         val_split: 0
 
 

@@ -186,7 +186,7 @@ def main(parser):
             trust_remote_code=True
         ).half().cuda()    # .half() represents to use half of orginal accuracy
     
-
+    
     if model_args.peft_path is not None:
         logger.info("Peft from pre-trained model")
         # Resume_training
@@ -327,45 +327,11 @@ def main(parser):
         # train_dataset.set_format("torch")
 
     if training_args.do_eval:
-        # max_target_length = data_args.val_max_target_length
-        # if "validation" not in raw_datasets:
-        #     raise ValueError("--do_eval requires a validation dataset")
-        # eval_dataset = raw_datasets["validation"]
-        # if data_args.max_eval_samples is not None:
-        #     max_eval_samples = min(len(eval_dataset), data_args.max_eval_samples)
-        #     eval_dataset = eval_dataset.select(range(max_eval_samples))
-        # with training_args.main_process_first(desc="validation dataset map pre-processing"):
-        #     eval_dataset = eval_dataset.map(
-        #         preprocess_function_eval,
-        #         batched=True,
-        #         num_proc=data_args.preprocessing_num_workers,
-        #         remove_columns=column_names,
-        #         load_from_cache_file=False,
-        #         desc="Running tokenizer on validation dataset",
-        #     )
+
         print_dataset_example(eval_dataset[0])
         print_dataset_example(eval_dataset[1])
 
     if training_args.do_predict:
-        # max_target_length = data_args.val_max_target_length
-        # if "test" not in raw_datasets:
-        #     raise ValueError("--do_predict requires a test dataset")
-        # predict_dataset = raw_datasets["test"]
-        # if data_args.max_predict_samples is not None:
-        #     max_predict_samples = min(len(predict_dataset), data_args.max_predict_samples)
-        #     predict_dataset = predict_dataset.select(range(max_predict_samples))
-        # with training_args.main_process_first(desc="prediction dataset map pre-processing"):
-        #     predict_dataset = predict_dataset.map(
-        #         preprocess_function_eval,
-        #         batched=True,
-        #         num_proc=data_args.preprocessing_num_workers,
-        #         remove_columns=column_names,
-        #         load_from_cache_file=False,
-        #         desc="Running tokenizer on prediction dataset",
-        #     )
-        # print_dataset_example(predict_dataset[0])
-        # print_dataset_example(predict_dataset[1])
-        # predict_dataset.set_format("torch")
         
         data_conf = read_yamls("/cpfs01/user/chenqin.p/dyh/MOELoRA-peft/src/configs")
         print(data_conf)
@@ -394,13 +360,7 @@ def main(parser):
         # data_collator = LongestSequenceCollator(tokenizer, task_flag, depart_flag)
         data_collator = DialogueDataCollator(tokenizer=tokenizer, max_len=data_args.max_source_length)
     elif training_args.do_predict:
-        # data_collator = DataCollatorForSeq2Seq(
-        #     tokenizer,
-        #     model=model,
-        #     label_pad_token_id=label_pad_token_id,
-        #     pad_to_multiple_of=None,
-        #     padding=False
-        # )
+
         data_collator = DialogueDataCollator(tokenizer=tokenizer, max_len=data_args.max_source_length)
 
     # Metric
@@ -483,46 +443,257 @@ def main(parser):
             binary_5bit = binary_str.zfill(5)
             return binary_5bit
 
+#         # predict llama for 32 tasks with dimensional description
+
+#         dim_to_idx = {
+#             "o":0,
+#             "c":1,
+#             "e":2,
+#             "a":3,
+#             "n":4
+#         }
+
+#         system_message_template = '''<s>[INST] <<SYS>>
+# You are to assume the role of an individual characterized by specific traits within the Big Five personality framework. The Big Five personality traits consist of Openness, Conscientiousness, Extraversion, Agreeableness, and Neuroticism. Each trait can be exhibited at high or low levels. Details are as follows.
+
+# 1. **Openness to Experience:**
+#    - **High Openness:** Individuals with high openness are characterized by a strong appreciation for art, emotion, adventure, and unusual ideas. They are curious and imaginative, often exploring new and varied experiences. These individuals are more likely to embrace change and are often seen as creative and open-minded.
+#    - **Low Openness:** People with low scores in openness tend to prefer routine and familiarity over new experiences. They might be perceived as conventional and resistant to change. Such individuals often prefer sticking to traditional ways of doing things and might be less receptive to new ideas.
+
+# 2. **Conscientiousness:**
+#    - **High Conscientiousness:** Those high in conscientiousness are generally reliable, well-organized, punctual, and responsible. They plan ahead, are detail-oriented, and are likely to stick to their goals. Such individuals are disciplined and prefer structured environments.
+#    - **Low Conscientiousness:** Individuals with low conscientiousness may exhibit a more spontaneous or flexible approach to life. They might be seen as disorganized or careless, often procrastinating or failing to complete tasks. They tend to dislike structure and schedules.
+
+# 3. **Extraversion:**
+#    - **High Extraversion:** Highly extraverted people are energetic, talkative, and assertive. They enjoy social gatherings, making new friends, and are often perceived as being full of energy. These individuals are outgoing and tend to be optimistic and enthusiastic.
+#    - **Low Extraversion (Introversion):** Introverts, or those low in extraversion, prefer solitude or small group interactions. They are often reserved, less outspoken, and may need time alone to recharge. Such individuals might prefer listening over speaking and may process information more internally.
+
+# 4. **Agreeableness:**
+#    - **High Agreeableness:** Individuals scoring high in agreeableness are typically cooperative, compassionate, and friendly. They value social harmony and are considerate, kind, and willing to help others. High agreeableness is associated with trustworthiness and altruism.
+#    - **Low Agreeableness:** Those with low scores in agreeableness might be more competitive, skeptical, or confrontational. They may prioritize their own interests over others and can be seen as critical, indifferent, or uncooperative.
+
+# 5. **Neuroticism:**
+#    - **High Neuroticism:** People with high levels of neuroticism are more prone to experiencing negative emotions like anxiety, sadness, and irritability. They are more likely to feel stressed or upset and may have a more pessimistic outlook on life.
+#    - **Low Neuroticism:** Individuals with low scores in neuroticism are typically calm, emotionally stable, and resilient. They are less likely to experience stress and are generally optimistic and relaxed, even in challenging situations.
+
+# Now, you will portray a person who demonstrates {}. respond within 30 words.
+# <</SYS>>
+
+# {} [/INST]'''
+
+
+#         logger.info("*** Predict ***")
+#         for t_id in range(32):
+#             import pandas as pd
+
+#             df = pd.read_excel("/cpfs01/user/chenqin.p/dyh/MOELoRA-peft/data/bigfive_questionnaire.xlsx")
+#             question_list = df["question_en"].to_list()
+#             dimensions = df["dimension"].to_list()
+
+#             cur_big_five_str = decimal_to_5bit_binary(t_id)
+
+#             model.cuda()
+#             prediction_list = []
+#             from tqdm import tqdm
+#             for data_i, data_point in enumerate(tqdm(test_dataset)):
+#                 input_str = data_point[0][0]
+#                 cur_dim_str = dimensions[data_i]
+#                 cur_dim = cur_dim_str[0].lower()
+#                 cur_idx = dim_to_idx[cur_dim]
+#                 if cur_big_five_str[cur_idx] == "0":
+#                     input_str = system_message_template.format(f"Low {cur_dim_str}", input_str)
+#                 else:
+#                     input_str = system_message_template.format(f"Low {cur_dim_str}", input_str)
+                    
+#                 input_ids = tokenizer(input_str)["input_ids"]
+#                 # print(input_ids)
+#                 # print("input:", tokenizer.convert_tokens_to_string(tokenizer.convert_ids_to_tokens(input_ids)))
+#                 input_ids = torch.tensor([input_ids], dtype=torch.long).cuda()
+#                 task_id = torch.tensor([t_id], dtype=torch.long).cuda()
+                
+#                 if not model_args.use_no_peft: 
+#                     result = model.generate(
+#                         input_ids=input_ids,
+#                         task_id=task_id,
+#                         max_new_tokens=100,
+#                         do_sample=True,
+#                         top_p=0.3,
+#                         temperature=0.8,
+#                     )
+#                 else:
+#                     result = model.generate(
+#                         input_ids=input_ids,
+#                         max_new_tokens=50,
+#                         do_sample=True,
+#                         top_p=0.3,
+#                         temperature=0.8,
+#                     )
+                
+#                 cur_result = tokenizer.convert_tokens_to_string(tokenizer.convert_ids_to_tokens(result.cpu()[0]))
+#                 prediction_list.append(cur_result)
+#                 print("output:", cur_result)
+
+
+            
+#             prediction_list = [r.split("[/INST]")[-1].strip().strip("</s>").strip() for r in prediction_list]
+
+#             df = pd.read_excel("/cpfs01/user/chenqin.p/dyh/MOELoRA-peft/data/bigfive_questionnaire.xlsx")
+#             question_list = df["question_en"].to_list()
+#             dimensions = df["dimension"].to_list()
+
+#             assert len(dimensions) == len(prediction_list)
+
+#             output_list = []
+#             for i in range(len(prediction_list)):
+#                 output_list.append({"dimension": dimensions[i], "response": prediction_list[i]})
+            
+#             os.makedirs(model_args.prediction_output_path, exist_ok=True)
+
+#             torch.save(output_list, os.path.join(model_args.prediction_output_path,f"{decimal_to_5bit_binary(t_id)}.pt"))
+
+        # # predict for 32 tasks
+        # logger.info("*** Predict ***")
+        # for t_id in range(32):
+        #     import pandas as pd
+
+        #     model.cuda()
+        #     prediction_list = []
+        #     from tqdm import tqdm
+        #     for data_point in tqdm(test_dataset):
+        #         if model_args.use_no_peft:
+        #             # system_message = "You are to assume the role of an individual characterized by specific traits within the Big Five personality framework. The Big Five personality traits consist of Openness, Conscientiousness, Extraversion, Agreeableness, and Neuroticism. Each trait can be exhibited at high or low levels. In this scenario, you will portray a person who demonstrates high Openness, high Conscientiousness, high Extraversion, high Agreeableness, and high Neuroticism. respond within 30 words."
+        #             system_message=None
+        #             data_point = list(data_point)
+        #             data_point[2] = system_message
+        #             data_point.append("<|CustomData|>")
+        #             data_point = tuple(data_point)
+        #         data_line = data_collator([data_point])
+        #         # print("data_line", data_line)
+        #         assistant_prefix = tokenizer("<s>assistant", add_special_tokens=False)['input_ids']
+        #         input_ids = data_line["input_ids"][0].tolist() + assistant_prefix
+        #         print("input:", tokenizer.convert_tokens_to_string(tokenizer.convert_ids_to_tokens(input_ids)))
+        #         input_ids = torch.tensor([input_ids], dtype=torch.long).cuda()
+        #         task_id = torch.tensor([t_id], dtype=torch.long).cuda()
+                
+        #         if not model_args.use_no_peft: 
+        #             result = model.generate(
+        #                 input_ids=input_ids,
+        #                 task_id=task_id,
+        #                 max_new_tokens=100,
+        #                 do_sample=True,
+        #                 top_p=0.3,
+        #                 temperature=0.8,
+        #             )
+        #         else:
+        #             result = model.generate(
+        #                 input_ids=input_ids,
+        #                 max_new_tokens=50,
+        #                 do_sample=True,
+        #                 top_p=0.3,
+        #                 temperature=0.8,
+        #             )
+                
+        #         cur_result = tokenizer.convert_tokens_to_string(tokenizer.convert_ids_to_tokens(result.cpu()[0]))
+        #         prediction_list.append(cur_result)
+        #         print("output:", cur_result)
+
+
+            
+        #     prediction_list = [r.split("<s> assistant")[1].strip().strip("</s>").strip() for r in prediction_list]
+
+        #     df = pd.read_excel("/cpfs01/user/chenqin.p/dyh/MOELoRA-peft/data/bigfive_questionnaire.xlsx")
+        #     question_list = df["question_en"].to_list()
+        #     dimensions = df["dimension"].to_list()
+
+        #     assert len(dimensions) == len(prediction_list)
+
+        #     output_list = []
+        #     for i in range(len(prediction_list)):
+        #         output_list.append({"dimension": dimensions[i], "response": prediction_list[i]})
+            
+        #     os.makedirs(model_args.prediction_output_path, exist_ok=True)
+
+        #     torch.save(output_list, os.path.join(model_args.prediction_output_path,f"{decimal_to_5bit_binary(t_id)}.pt"))
+        
+
+        # predict for 10 dimensions
+
+        import itertools
+
+        # Generate all permutations of length 5 for 0 and 1
+        permutations = list(itertools.product([0, 1], repeat=5))
+
         logger.info("*** Predict ***")
 
-        for t_id in range(32):
+        import pandas as pd
+        df = pd.read_excel("/cpfs01/user/chenqin.p/dyh/MOELoRA-peft/data/bigfive_questionnaire.xlsx")
+        question_list = df["question_en"].to_list()
+        dimensions = df["dimension"].to_list()
 
-            # 读取原test file
-            # list_test_samples = []
-            # with open(data_args.test_file, "r", encoding="utf-8") as f:
-            #     for line in f:
-            #         line = json.loads(line)
-            #         list_test_samples.append(line)
-            import pandas as pd
-            # df = pd.read_excel(data_args.test_file)
+        dim_to_idx = {
+            "o":0,
+            "c":1,
+            "e":2,
+            "a":3,
+            "n":4
+        }
 
-            # Extract the "question_en" column into a list
-            # question_en_list = df['question_en'].tolist()
-            # dim_list = df['dimension'].tolist()
-            # input_ids = tokenizer("随便生成一段话", return_tensors="pt").cuda()
-            # result = model.generate(input_ids)
-            # print("result", result)
-            # print("result", tokenizer.convert_ids_to_tokens(result))
+        dim_to_task_id = {
+            "o_high":0,
+            "c_high":1,
+            "e_high":2,
+            "a_high":3,
+            "n_high":4,
+            "o_low":5,
+            "c_low":6,
+            "e_low":7,
+            "a_low":8,
+            "n_low":9,
+        }
+
+        for permut_i, permutation in enumerate(permutations):
+            if not (permutation == (0,0,0,0,0) or permutation == (1,1,1,1,1)):
+                continue
             model.cuda()
             prediction_list = []
             from tqdm import tqdm
-            for data_point in tqdm(test_dataset):
+            assert len(dimensions) == len(test_dataset)
+            for data_i, data_point in enumerate(tqdm(test_dataset)):
                 if model_args.use_no_peft:
-                    system_message = "You are to assume the role of an individual characterized by specific traits within the Big Five personality framework. The Big Five personality traits consist of Openness, Conscientiousness, Extraversion, Agreeableness, and Neuroticism. Each trait can be exhibited at high or low levels. In this scenario, you will portray a person who demonstrates high Openness, high Conscientiousness, high Extraversion, high Agreeableness, and high Neuroticism. respond within 30 words."
+                    # system_message = "You are to assume the role of an individual characterized by specific traits within the Big Five personality framework. The Big Five personality traits consist of Openness, Conscientiousness, Extraversion, Agreeableness, and Neuroticism. Each trait can be exhibited at high or low levels. In this scenario, you will portray a person who demonstrates high Openness, high Conscientiousness, high Extraversion, high Agreeableness, and high Neuroticism. respond within 30 words."
+                    system_message=None
                     data_point = list(data_point)
                     data_point[2] = system_message
                     data_point.append("<|CustomData|>")
                     data_point = tuple(data_point)
                 data_line = data_collator([data_point])
                 # print("data_line", data_line)
-                input_ids = data_line["input_ids"].cuda()
-                task_id = torch.tensor([t_id], dtype=torch.long).cuda()
+                assistant_prefix = tokenizer("<s>assistant", add_special_tokens=False)['input_ids']
+                input_ids = data_line["input_ids"][0].tolist() + assistant_prefix
+
+                print("input:", tokenizer.convert_tokens_to_string(tokenizer.convert_ids_to_tokens(input_ids)))
+                input_ids = torch.tensor([input_ids], dtype=torch.long).cuda()
+
+                cur_dim = dimensions[data_i][0].lower()
+                cur_idx = dim_to_idx[cur_dim]
+                suffix = None
+                if permutation[cur_idx] == 0:
+                    suffix = "low"
+                else:
+                    suffix= "high"
+                cur_task_name = f"{cur_dim}_{suffix}"
+                cur_task_id = dim_to_task_id[cur_task_name]
+                task_id = torch.tensor([cur_task_id], dtype=torch.long).cuda()
+
+                print(permutation)
+                print(cur_dim)
+                print(cur_task_name)
                 
                 if not model_args.use_no_peft: 
                     result = model.generate(
                         input_ids=input_ids,
                         task_id=task_id,
-                        max_new_tokens=50,
+                        max_new_tokens=100,
                         do_sample=True,
                         top_p=0.3,
                         temperature=0.8,
@@ -535,19 +706,16 @@ def main(parser):
                         top_p=0.3,
                         temperature=0.8,
                     )
+                
                 cur_result = tokenizer.convert_tokens_to_string(tokenizer.convert_ids_to_tokens(result.cpu()[0]))
                 prediction_list.append(cur_result)
+                print("output:", cur_result)
 
-                # except Exception as e:
-                #     print(f"An error occurred: {e}")
-                #     print(data_point[0][0])
-                #     prediction_list.append(data_point[0][0])
+
             
             prediction_list = [r.split("<s> assistant")[1].strip().strip("</s>").strip() for r in prediction_list]
 
-            df = pd.read_excel("/cpfs01/user/chenqin.p/dyh/MOELoRA-peft/data/bigfive_questionnaire.xlsx")
-            question_list = df["question_en"].to_list()
-            dimensions = df["dimension"].to_list()
+            
 
             assert len(dimensions) == len(prediction_list)
 
@@ -555,60 +723,15 @@ def main(parser):
             for i in range(len(prediction_list)):
                 output_list.append({"dimension": dimensions[i], "response": prediction_list[i]})
             
-            os.makedirs(model_args.test_output_path, exist_ok=True)
+            os.makedirs(model_args.prediction_output_path, exist_ok=True)
 
-            torch.save(output_list, os.path.join(model_args.test_output_path, f"{decimal_to_5bit_binary(t_id)}.pt"))
-        
+            permutation = list(permutation)
+            permutation = [str(i) for i in permutation]
+            permutation = "".join(permutation)
 
-        # predict_results = trainer.predict(
-        #     test_dataset,
-        #     metric_key_prefix="predict",
-        #     # max_tokens=512,
-        #     max_new_tokens=data_args.max_target_length,
-        #     do_sample=True,
-        #     top_p=0.3,
-        #     temperature=0.5,
-        #     # repetition_penalty=1.1
-        # )
-        # print(predict_results)
-        # metrics = predict_results.metrics
-        # print(metrics)
-        # max_predict_samples = (
-        #     data_args.max_predict_samples if data_args.max_predict_samples is not None else len(predict_dataset)
-        # )
-        # metrics["predict_samples"] = min(max_predict_samples, len(predict_dataset))
+            torch.save(output_list, os.path.join(model_args.prediction_output_path,f"{permutation}.pt"))
 
-        #trainer.log_metrics("predict", metrics)
-        #trainer.save_metrics("predict", metrics)
-
-        # if trainer.is_world_process_zero():
-        #     if training_args.predict_with_generate:
-        #         predictions = tokenizer.batch_decode(
-        #             predict_results.predictions, skip_special_tokens=True, clean_up_tokenization_spaces=True
-        #         )
-        #         predictions = [pred.strip() for pred in predictions]
-        #         # labels = tokenizer.batch_decode(
-        #         #     predict_results.label_ids, skip_special_tokens=True, clean_up_tokenization_spaces=True
-        #         # )
-        #         # labels = [label.strip() for label in labels]
-        #         # assert len(labels) == len(list_test_samples)
-
-        #         output_prediction_file = os.path.join(training_args.output_dir, "test_predictions.json")
-
-        #         # with open(output_prediction_file, "w", encoding="utf-8") as writer:
-        #         #     for idx, (p, l) in enumerate(zip(predictions, labels)):
-        #         #         samp = list_test_samples[idx]
-        #         #         samp["target"] = p
-        #         #         res = json.dumps(samp, ensure_ascii=False)
-        #         #         writer.write(f"{res}\n")
-
-        #         with open(output_prediction_file, "w", encoding="utf-8") as writer:
-        #             for idx, p in enumerate(predictions):
-        #                 samp = question_en_list[i]
-        #                 samp["target"] = p
-        #                 samp["dim"] = dim_list[i]
-        #                 res = json.dumps(samp, ensure_ascii=False)
-        #                 writer.write(f"{res}\n")
+      
 
     return results
 
