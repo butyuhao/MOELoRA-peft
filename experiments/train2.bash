@@ -6,27 +6,26 @@ LR=2e-4
 MASTER_PORT=$(shuf -n 1 -i 10000-65535)
 model_name_or_path="/cpfs01/user/chenqin.p/model_cached/Llama-2-7b-chat-hf"   
 your_data_path="data"  
-your_checkpopint_path="saved/moelora/2experts_q"  
+your_checkpopint_path="saved/moelora/2experts_dimensional_q_4_13"  
 MAX_SOURCE_LENGTH=512
 peft_path=""  
-
-export WANDB_DISABLED="true"
 
 # Training Command
 deepspeed --num_gpus=4 --master_port $MASTER_PORT run_mlora.py \
     --deepspeed src/ds.config \
-    --data_config bigfive_task_q\
+    --data_config dimensional_task_q_4_13\
     --do_train \
     --train_file $your_data_path/train.json \
     --cache_dir $your_data_path \
     --prompt_column input \
     --response_column target \
     --overwrite_cache \
+    --warmup_steps 30 \
     --model_name_or_path $model_name_or_path \
     --output_dir $your_checkpopint_path \
     --overwrite_output_dir \
     --max_source_length $MAX_SOURCE_LENGTH \
-    --max_target_length 196 \
+    --max_target_length 256 \
     --per_device_train_batch_size 1 \
     --per_device_eval_batch_size 1 \
     --gradient_accumulation_steps 8 \
@@ -41,7 +40,7 @@ deepspeed --num_gpus=4 --master_port $MASTER_PORT run_mlora.py \
     --fp16 \
     --lora_name moelora \
     --expert_num 2 \
-    --task_num 32 \
+    --task_num 10 \
     --task_embedding_dim 64
 
 # deepspeed --num_gpus=4 --master_port $MASTER_PORT run_mlora.py \
@@ -72,5 +71,5 @@ deepspeed --num_gpus=4 --master_port $MASTER_PORT run_mlora.py \
 #     --fp16 \
 #     --lora_name moelora \
 #     --expert_num 10
-#     --task_num 32 \
+#     --task_num 10 \
 #     --task_embedding_dim 64

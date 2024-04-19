@@ -11,6 +11,9 @@ class ModelArguments:
     model_name_or_path: str = field(
         metadata={"help": "Path to pretrained model or model identifier from huggingface.co/models"}
     )
+    prediction_output_path: Optional[str] = field(
+        default=None
+    )
     lora_name: Optional[str] = field(
         default="lora", metadata={"help": "LoRA Type"}
     )
