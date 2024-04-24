@@ -48,11 +48,11 @@ for ((i=0; i<${#list1[@]}; i++)); do
     item1=${list1[$i]}
     item2=${list2[$i]}
 
-    CUDA_VISIBLE_DEVICES=0 deepspeed --num_gpus=1 --master_port $MASTER_PORT run_mlora.py \
+    deepspeed --num_gpus=1 --master_port $MASTER_PORT run_mlora.py \
     --do_predict \
     --data_config bigfive_task_test \
-    --peft_path "/cpfs01/user/chenqin.p/dyh/MOELoRA-peft/saved/moelora/2experts_dimensional_q_4_13/checkpoint-${item2}" \
-    --prediction_output_path "/cpfs01/user/chenqin.p/dyh/MOELoRA-peft/eval/llama/2expert/epoch${item1}_4_13" \
+    --peft_path "/cpfs01/user/chenqin.p/dyh/MOELoRA-peft/saved/moelora/2experts_dimensional_q_4_21_balancing/checkpoint-${item2}" \
+    --prediction_output_path "/cpfs01/user/chenqin.p/dyh/MOELoRA-peft/eval/llama/2expert/epoch${item1}_4_21_balancing" \
     --test_file /cpfs01/user/chenqin.p/dyh/MOELoRA-peft/data/bigfive_questionnaire.xlsx \
     --cache_dir $your_data_path \
     --overwrite_cache \

@@ -1215,9 +1215,16 @@ class PeftModelForCausalLMShared(PeftModelForCausalLM):
                 output_attentions=None, 
                 output_hidden_states=None, 
                 return_dict=None, 
+                expert_balancing=True,
                 **kwargs):
         
         peft_config = self.active_peft_config
+
+        expert_weight_all = None
+        if expert_balancing:
+            iterate_tasks = torch.tensor([i for i in range(10)], device="cuda")
+            expert_weight_all = self.lora_gate[self.active_adapter](self.lora_task_embedding[self.active_adapter](iterate_tasks))
+        kwargs["expert_weight_all"] = expert_weight_all
 
         if kwargs["task_id"] is not None:
             task_id = kwargs["task_id"]

@@ -787,6 +787,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
         output_hidden_states: Optional[bool] = None,
         return_dict: Optional[bool] = None,
         task_id: Optional[torch.Tensor] = None,
+        expert_weight_all: Optional[torch.Tensor] = None,
     ) -> Union[Tuple, CausalLMOutputWithPast]:
         r"""
         Args:
@@ -852,6 +853,45 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
             logits = self.lm_head(hidden_states)
         logits = logits.float()
 
+        
+        # expert_weight_all = expert_weight_all * 10.0
+        # print("expert_weight_all", expert_weight_all)
+        # product = torch.prod(expert_weight_all, dim=0, keepdim=True)
+        # print("product", product) #相似度矩阵减掉单位阵。！！！！！
+        # expert_balancing_loss = torch.sum(product**2)
+
+        # # balancing loss 1
+        # print("expert_weight_all", expert_weight_all)
+
+        # norms = torch.norm(expert_weight_all, p=2, dim=1, keepdim=True)  # 计算每个向量的L2范数
+        # normalized_data = expert_weight_all / norms  # 除以各自的范数进行标准化
+
+        # similarity_matrix = torch.mm(normalized_data, normalized_data.t())  # 计算标准化向量矩阵与其转置的矩阵乘积
+
+        # similarity_matrix = abs(similarity_matrix - torch.eye(10, device="cuda"))  # 对角线上的元素应该接近1
+
+        # expert_balancing_loss = torch.sum(similarity_matrix)
+
+        # balancing loss 2
+    
+        # norms = torch.norm(expert_weight_all, p=2, dim=1, keepdim=True)  # 计算每个向量的L2范数
+        # normalized_data = expert_weight_all / norms  # 除以各自的范数进行标准化
+
+        # similarity_matrix = torch.mm(normalized_data, normalized_data.t())  # 计算标准化向量矩阵与其转置的矩阵乘积
+
+        # labels = torch.tensor([0,1,2,3,4,5,6,7,8,9], device="cuda")
+
+        # similarity_matrix = similarity_matrix.view(10, 10)
+        # labels = labels.view(10)
+
+        # criterion = torch.nn.CrossEntropyLoss()
+
+        # print(similarity_matrix.shape)
+        # print(similarity_matrix)
+
+        # expert_balancing_loss = criterion(similarity_matrix, labels)
+
+
         loss = None
         if labels is not None:
             # Shift so that tokens < n predict n
@@ -868,6 +908,12 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
         if not return_dict:
             output = (logits,) + outputs[1:]
             return (loss,) + output if loss is not None else output
+
+
+        # print("loss", loss)
+        # print("expert_balancing_loss", 0.1*expert_balancing_loss)
+        
+        # loss = loss + 0.1 * expert_balancing_loss
 
         return CausalLMOutputWithPast(
             loss=loss,

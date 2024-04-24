@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 # here put the import lib
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 
 from src.MLoRA.main import main
 from transformers import HfArgumentParser, Seq2SeqTrainingArguments

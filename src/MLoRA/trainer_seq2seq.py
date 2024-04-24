@@ -142,6 +142,7 @@ class Seq2SeqTrainer(Trainer):
 
         Subclass and override for custom behavior.
         """
+        
         # print("compute_loss_called")
         if self.label_smoother is not None and "labels" in inputs:
             labels = inputs.pop("labels")

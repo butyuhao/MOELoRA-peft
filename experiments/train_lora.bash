@@ -1,4 +1,4 @@
-lora_rank=32
+lora_rank=256
 lora_trainable="gate_proj,k_proj,o_proj,down_proj,v_proj,q_proj,up_proj"
 modules_to_save="null"
 lora_dropout=0.1
@@ -6,14 +6,14 @@ LR=2e-4
 MASTER_PORT=$(shuf -n 1 -i 10000-65535)
 model_name_or_path="/cpfs01/user/chenqin.p/model_cached/Llama-2-7b-chat-hf"   
 your_data_path="data"  
-your_checkpopint_path="saved/moelora/2experts_q"  
+your_checkpopint_path="saved/moelora/lora256"  
 MAX_SOURCE_LENGTH=512
 peft_path=""  
 
 export WANDB_DISABLED="true"
 
 # Training Command
-deepspeed --num_gpus=4 --master_port $MASTER_PORT run_mlora.py \
+deepspeed --num_gpus=8 --master_port $MASTER_PORT run_mlora.py \
     --deepspeed src/ds.config \
     --data_config bigfive_task_q\
     --do_train \
@@ -28,10 +28,10 @@ deepspeed --num_gpus=4 --master_port $MASTER_PORT run_mlora.py \
     --output_dir $your_checkpopint_path \
     --overwrite_output_dir \
     --max_source_length $MAX_SOURCE_LENGTH \
-    --max_target_length 196 \
+    --max_target_length 256 \
     --per_device_train_batch_size 1 \
     --per_device_eval_batch_size 1 \
-    --gradient_accumulation_steps 8 \
+    --gradient_accumulation_steps 4 \
     --num_train_epochs=5 \
     --save_strategy="epoch" \
     --logging_steps 100 \

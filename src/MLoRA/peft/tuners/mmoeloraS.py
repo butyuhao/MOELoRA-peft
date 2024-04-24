@@ -176,6 +176,8 @@ class MMOELoraLinearS(MMOELoraLinear):
                     * self.scaling[self.active_adapter]
                     * expert_weight[..., i].unsqueeze(-1).unsqueeze(-1)
                 )
+                # print("expert_weight", torch.sum(expert_weight[..., i].unsqueeze(-1).unsqueeze(-1)))
+                # print("expert_weight", expert_weight[..., i].unsqueeze(-1).unsqueeze(-1))
         else:
             result = F.linear(x, transpose(self.weight, self.fan_in_fan_out), bias=self.bias)
 
